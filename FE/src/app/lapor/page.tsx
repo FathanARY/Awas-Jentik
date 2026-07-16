@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import VillageMapPicker, { type SelectedCell } from "./VillageMapPicker";
 
 export default function LaporPage() {
   const router = useRouter();
   const [vegetasi, setVegetasi] = useState(true);
+  const [selectedGrid, setSelectedGrid] = useState<SelectedCell | null>(null);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -166,18 +168,51 @@ export default function LaporPage() {
             className="text-2xl md:text-3xl font-semibold"
             style={{ color: "var(--color-on-surface)" }}
           >
-            Laporan Genangan Baru
+            New Puddle Report
           </h1>
           <p
             className="text-base mt-2"
             style={{ color: "var(--color-on-surface-variant)" }}
           >
-            Silakan lengkapi data observasi lapangan dengan akurat.
+            Please complete the field observation data accurately.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="max-w-3xl space-y-4 md:space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+            {/* Lokasi Genangan — full width */}
+            <div
+              className="rounded-xl p-4 border shadow-sm col-span-1 md:col-span-2"
+              style={{
+                backgroundColor: "var(--color-surface-container-lowest)",
+                borderColor: "var(--color-outline-variant)",
+              }}
+            >
+              <h3
+                className="text-xl font-semibold mb-6 flex items-center gap-2 border-b pb-2"
+                style={{
+                  color: "var(--color-on-surface)",
+                  borderColor: "var(--color-outline-variant)",
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ color: "var(--color-primary)" }}
+                >
+                  map
+                </span>
+                Puddle Location (Dummy Map)
+              </h3>
+              
+              {/* Interactive 50×50 canvas map */}
+              <VillageMapPicker selected={selectedGrid} onSelect={setSelectedGrid} />
+
+              {/* Hidden form inputs carrying the selected grid coords */}
+              <input type="hidden" name="grid_x" value={selectedGrid?.x ?? ""} />
+              <input type="hidden" name="grid_y" value={selectedGrid?.y ?? ""} />
+              <input type="hidden" name="grid_land" value={selectedGrid?.land ?? ""} />
+            </div>
 
             {/* Karakteristik Genangan — full width */}
             <div
@@ -200,7 +235,7 @@ export default function LaporPage() {
                 >
                   schedule
                 </span>
-                Karakteristik Genangan
+                Puddle Characteristics
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Lama genangan */}
@@ -209,13 +244,13 @@ export default function LaporPage() {
                     className="block text-sm font-medium mb-4"
                     style={{ color: "var(--color-on-surface)" }}
                   >
-                    Lama genangan
+                    Puddle duration
                   </label>
                   <div className="space-y-2">
                     {[
-                      { value: "lt3", label: "<3 hari" },
-                      { value: "3-7", label: "3-7 hari" },
-                      { value: "gt7", label: ">7 hari" },
+                      { value: "lt3", label: "<3 days" },
+                      { value: "3-7", label: "3-7 days" },
+                      { value: "gt7", label: ">7 days" },
                     ].map((opt, i) => (
                       <label
                         key={opt.value}
@@ -245,7 +280,7 @@ export default function LaporPage() {
                     htmlFor="jenis_genangan"
                     style={{ color: "var(--color-on-surface)" }}
                   >
-                    Jenis genangan
+                    Puddle type
                   </label>
                   <div className="relative">
                     <select
@@ -258,8 +293,8 @@ export default function LaporPage() {
                         color: "var(--color-on-surface)",
                       }}
                     >
-                      <option value="alami">Alami (rawa/kubangan)</option>
-                      <option value="buatan">Buatan (ban, galian, wadah)</option>
+                      <option value="alami">Natural (swamp/puddle)</option>
+                      <option value="buatan">Artificial (tire, excavation, container)</option>
                     </select>
                     <div
                       className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2"
@@ -290,13 +325,13 @@ export default function LaporPage() {
                 >
                   water_drop
                 </span>
-                Kondisi Air
+                Water Condition
               </h3>
               <div className="space-y-2">
                 {[
-                  { value: "jernih", label: "Jernih" },
-                  { value: "keruh", label: "Keruh" },
-                  { value: "tercemar", label: "Tercemar" },
+                  { value: "jernih", label: "Clear" },
+                  { value: "keruh", label: "Murky" },
+                  { value: "tercemar", label: "Polluted" },
                 ].map((opt, i) => (
                   <label
                     key={opt.value}
@@ -338,20 +373,20 @@ export default function LaporPage() {
                 >
                   wb_sunny
                 </span>
-                Lingkungan Sekitar
+                Surrounding Environment
               </h3>
               <div className="mb-4">
                 <label
                   className="block text-sm font-medium mb-2"
                   style={{ color: "var(--color-on-surface)" }}
                 >
-                  Paparan matahari
+                  Sun exposure
                 </label>
                 <div className="space-y-2">
                   {[
-                    { value: "terbuka", label: "Terbuka penuh" },
-                    { value: "sebagian", label: "Sebagian" },
-                    { value: "ternaungi", label: "Ternaungi" },
+                    { value: "terbuka", label: "Fully open" },
+                    { value: "sebagian", label: "Partial" },
+                    { value: "ternaungi", label: "Shaded" },
                   ].map((opt, i) => (
                     <label
                       key={opt.value}
@@ -383,7 +418,7 @@ export default function LaporPage() {
                   htmlFor="vegetasi_toggle"
                   style={{ color: "var(--color-on-surface)" }}
                 >
-                  Vegetasi sekitar?
+                  Surrounding vegetation?
                 </label>
                 <input
                   className="custom-toggle"
@@ -417,7 +452,7 @@ export default function LaporPage() {
                 >
                   radar
                 </span>
-                Risiko Eksposur
+                Exposure Risk
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Jarak pemukiman */}
@@ -426,7 +461,7 @@ export default function LaporPage() {
                     className="block text-sm font-medium mb-4"
                     style={{ color: "var(--color-on-surface)" }}
                   >
-                    Jarak pemukiman
+                    Distance to residential area
                   </label>
                   <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-4 cursor-pointer">
@@ -445,7 +480,7 @@ export default function LaporPage() {
                             color: "var(--color-on-error-container)",
                           }}
                         >
-                          Tinggi
+                          High
                         </span>
                       </span>
                     </label>
@@ -480,13 +515,13 @@ export default function LaporPage() {
                     className="block text-sm font-medium mb-4"
                     style={{ color: "var(--color-on-surface)" }}
                   >
-                    Aktivitas nyamuk terlihat?
+                    Mosquito activity visible?
                   </label>
                   <div className="flex flex-col gap-2">
                     {[
-                      { value: "ya", label: "Ya" },
-                      { value: "tidak", label: "Tidak" },
-                      { value: "tidak_yakin", label: "Tidak yakin" },
+                      { value: "ya", label: "Yes" },
+                      { value: "tidak", label: "No" },
+                      { value: "tidak_yakin", label: "Not sure" },
                     ].map((opt, i) => (
                       <label key={opt.value} className="flex items-center gap-4 cursor-pointer">
                         <input
@@ -512,7 +547,7 @@ export default function LaporPage() {
                 className="block text-sm font-semibold mb-2"
                 style={{ color: "var(--color-on-surface)" }}
               >
-                Unggah Foto Verifikasi (Wajib)
+                Upload Verification Photo (Required)
               </label>
               <div
                 className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer min-h-[200px] text-center transition-colors"
@@ -536,13 +571,13 @@ export default function LaporPage() {
                   className="text-base font-medium mb-1"
                   style={{ color: "var(--color-primary)" }}
                 >
-                  Ketuk untuk mengambil atau memilih foto
+                  Tap to capture or select photo
                 </p>
                 <p
                   className="text-xs"
                   style={{ color: "var(--color-on-surface-variant)" }}
                 >
-                  Pastikan genangan terlihat jelas beserta area sekitarnya.
+                  Ensure the puddle is clearly visible along with its surrounding area.
                 </p>
                 <input accept="image/*" capture="environment" className="hidden" type="file" />
               </div>
@@ -561,7 +596,7 @@ export default function LaporPage() {
               }}
             >
               <span className="material-symbols-outlined filled-icon text-lg">send</span>
-              Kirim Laporan
+              Submit Report
             </button>
           </div>
         </form>

@@ -15,8 +15,8 @@ export async function generateMetadata({
 }) {
   const { id } = await params;
   return {
-    title: `Detail Laporan #${id} — MalariaWatch Admin`,
-    description: `Detail observasi lapangan dan AI consistency check untuk laporan #${id}.`,
+    title: `Report Detail #${id} — MalariaWatch Admin`,
+    description: `Field observation details and AI consistency check for report #${id}.`,
   };
 }
 
@@ -44,7 +44,7 @@ export default async function AdminLaporanDetailPage({
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              aria-label="Kembali"
+              aria-label="Back"
               className="p-2 -ml-2 rounded-full transition-colors flex items-center"
               style={{ color: "var(--color-on-surface)" }}
             >
@@ -57,13 +57,13 @@ export default async function AdminLaporanDetailPage({
                 className="text-xl font-semibold"
                 style={{ color: "var(--color-on-surface)" }}
               >
-                Detail Laporan #{id}
+                Report Detail #{id}
               </h1>
               <p
                 className="text-xs"
                 style={{ color: "var(--color-on-surface-variant)" }}
               >
-                Desa Sukamaju • Diunggah 24 Okt 2023, 14:30 WIB
+                Sukamaju Village • Uploaded 24 Oct 2023, 14:30 WIB
               </p>
             </div>
           </div>
@@ -76,7 +76,7 @@ export default async function AdminLaporanDetailPage({
               }}
             >
               <span className="material-symbols-outlined text-sm">sync</span>
-              Menunggu Tindakan
+              Pending Action
             </span>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default async function AdminLaporanDetailPage({
                   className="text-xl font-semibold"
                   style={{ color: "var(--color-on-surface)" }}
                 >
-                  Data Observasi Lapangan
+                  Field Observation Data
                 </h2>
               </div>
               <div className="p-4 flex flex-col gap-6">
@@ -118,7 +118,7 @@ export default async function AdminLaporanDetailPage({
                     className="text-xs font-semibold uppercase tracking-wider"
                     style={{ color: "var(--color-on-surface-variant)" }}
                   >
-                    Bukti Foto Lokasi
+                    Location Photo Evidence
                   </h3>
                   <div
                     className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden border"
@@ -130,7 +130,7 @@ export default async function AdminLaporanDetailPage({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGjWqPdMeWzM0wrCXqAMt70X9e_eb9PBlH4ST1s_7x4Iemi6o5kgOSZwqgqL08z0T6S8730o9forREgKx_H0ctVYzVweunEfDFOltKm49tA4podgd-Ucm00Qt7mJ0q2BwAzR-bqgk3gjB9C86DhMbOU1Pcfr1QPKdd7mXemOZnifRXIM8072C5r2n9SyrqXnUcuPjciEQQlWDonjzwIQSQHM1i4vFrRGIhUrzs8B5y4JacSNlRMtmwvg"
-                      alt="Foto lokasi observasi"
+                      alt="Observation location photo"
                       className="w-full h-full object-cover"
                     />
                     <div
@@ -154,14 +154,14 @@ export default async function AdminLaporanDetailPage({
                     className="text-xs font-semibold uppercase tracking-wider"
                     style={{ color: "var(--color-on-surface-variant)" }}
                   >
-                    Hasil Pemeriksaan Visual
+                    Visual Inspection Results
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { label: "Genangan Air Jernih", value: "Ya", highlight: true },
-                      { label: "Jentik Nyamuk Terlihat", value: "Ya", highlight: true },
-                      { label: "Tutupan Vegetasi Rapat", value: "Ya", highlight: true },
-                      { label: "Jarak ke Pemukiman", value: "< 50 Meter", highlight: false },
+                      { label: "Clear Water Puddle", value: "Yes", highlight: true },
+                      { label: "Mosquito Larvae Visible", value: "Yes", highlight: true },
+                      { label: "Dense Vegetation Cover", value: "Yes", highlight: true },
+                      { label: "Distance to Settlement", value: "< 50 Meter", highlight: false },
                     ].map((item) => (
                       <div
                         key={item.label}
@@ -245,10 +245,10 @@ export default async function AdminLaporanDetailPage({
               <table className="w-full text-left border-collapse">
                 <tbody>
                   {[
-                    { item: "Vegetasi", result: "Match", icon: "check_circle", color: "var(--color-primary)" },
-                    { item: "Air Jernih", result: "Match", icon: "check_circle", color: "var(--color-primary)" },
+                    { item: "Vegetation", result: "Match", icon: "check_circle", color: "var(--color-primary)" },
+                    { item: "Clear Water", result: "Match", icon: "check_circle", color: "var(--color-primary)" },
                     {
-                      item: "Kondisi Lokasi",
+                      item: "Location Condition",
                       result: "High Consistency",
                       icon: "verified",
                       color: "var(--color-secondary)",
@@ -300,7 +300,7 @@ export default async function AdminLaporanDetailPage({
                 className="text-xs font-semibold uppercase tracking-wider mb-2"
                 style={{ color: "var(--color-on-surface-variant)" }}
               >
-                Skor Area Final
+                Final Area Score
               </h2>
               <div className="flex items-baseline gap-2 mb-2">
                 <span
@@ -324,14 +324,13 @@ export default async function AdminLaporanDetailPage({
                 }}
               >
                 <span className="material-symbols-outlined text-lg">warning</span>
-                <span className="text-xl font-semibold">Kritis</span>
+                <span className="text-xl font-semibold">Critical</span>
               </div>
               <p
                 className="text-sm mt-4"
                 style={{ color: "var(--color-on-surface-variant)" }}
               >
-                Skor menunjukkan probabilitas tinggi sebagai sarang aktif vektor
-                malaria. Tindakan segera direkomendasikan.
+                Score indicates a high probability of an active malaria vector breeding site. Immediate action is recommended.
               </p>
             </section>
           </div>
@@ -350,7 +349,7 @@ export default async function AdminLaporanDetailPage({
             }}
           >
             <span className="material-symbols-outlined text-lg">rule</span>
-            Verifikasi Manual
+            Manual Verification
           </button>
           <button
             className="w-full sm:w-auto px-6 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 shadow-sm transition-colors"
@@ -360,7 +359,7 @@ export default async function AdminLaporanDetailPage({
             }}
           >
             <span className="material-symbols-outlined text-lg">pest_control</span>
-            Jadwalkan Fogging
+            Schedule Fogging
           </button>
           <button
             className="w-full sm:w-auto px-6 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 shadow-sm transition-colors"
@@ -370,7 +369,7 @@ export default async function AdminLaporanDetailPage({
             }}
           >
             <span className="material-symbols-outlined text-lg">done_all</span>
-            Tandai Sudah Ditindaklanjuti
+            Mark as Resolved
           </button>
         </div>
       </main>

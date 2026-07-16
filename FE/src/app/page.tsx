@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "MalariaWatch — Portal Warga",
+  title: "MalariaWatch — Citizen Portal",
   description:
-    "Laporan genangan air Anda membantu mencegah penyebaran malaria di komunitas.",
+    "Your puddle report helps prevent the spread of malaria in the community.",
 };
 
 export default function HomePage() {
@@ -30,14 +30,14 @@ export default function HomePage() {
           <button
             className="p-2 rounded-full transition-colors"
             style={{ color: "var(--color-on-surface-variant)" }}
-            aria-label="Notifikasi"
+            aria-label="Notifications"
           >
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <button
             className="p-2 rounded-full transition-colors"
             style={{ color: "var(--color-on-surface-variant)" }}
-            aria-label="Akun"
+            aria-label="Account"
           >
             <span className="material-symbols-outlined">account_circle</span>
           </button>
@@ -52,13 +52,13 @@ export default function HomePage() {
             className="text-2xl md:text-3xl font-semibold"
             style={{ color: "var(--color-on-surface)" }}
           >
-            Lawan Malaria Bersama
+            Fight Malaria Together
           </h1>
           <p
             className="text-base"
             style={{ color: "var(--color-on-surface-variant)" }}
           >
-            Laporan Anda membantu mencegah penyebaran wabah di komunitas kita.
+            Your report helps prevent the spread of outbreaks in our community.
           </p>
         </section>
 
@@ -85,14 +85,14 @@ export default function HomePage() {
             className="text-xl font-semibold"
             style={{ color: "var(--color-on-surface)" }}
           >
-            Temukan Genangan Air?
+            Found a Water Puddle?
           </h2>
           <p
             className="text-base max-w-md"
             style={{ color: "var(--color-on-surface-variant)" }}
           >
-            Nyamuk malaria berkembang biak di genangan air. Laporkan segera agar
-            tim dapat melakukan tindakan preventif.
+            Malaria mosquitoes breed in water puddles. Report immediately so the
+            team can take preventive action.
           </p>
           <Link
             href="/lapor"
@@ -106,7 +106,7 @@ export default function HomePage() {
             <span className="material-symbols-outlined text-sm">
               add_location
             </span>
-            Lapor Genangan Air
+            Report Water Puddle
           </Link>
         </section>
 
@@ -117,14 +117,14 @@ export default function HomePage() {
               className="text-xl font-semibold"
               style={{ color: "var(--color-on-surface)" }}
             >
-              Peta Komunitas
+              Community Map
             </h2>
             <a
               href="#"
               className="text-sm font-medium flex items-center gap-1 hover:underline"
               style={{ color: "var(--color-primary)" }}
             >
-              Lihat Penuh
+              See Full
               <span className="material-symbols-outlined text-sm">
                 chevron_right
               </span>
@@ -163,13 +163,13 @@ export default function HomePage() {
                     className="text-sm font-medium"
                     style={{ color: "var(--color-on-surface)" }}
                   >
-                    3 Hotspot Aktif
+                    3 Active Hotspots
                   </span>
                   <span
                     className="text-xs font-semibold"
                     style={{ color: "var(--color-on-surface-variant)" }}
                   >
-                    Dalam radius 2km
+                    Within 2km radius
                   </span>
                 </div>
               </div>
@@ -185,21 +185,21 @@ export default function HomePage() {
               bg: "var(--color-secondary-container)",
               fg: "var(--color-on-secondary-container)",
               value: "124",
-              label: "Laporan Selesai",
+              label: "Completed Reports",
             },
             {
               icon: "pending_actions",
               bg: "var(--color-tertiary-container)",
               fg: "var(--color-on-tertiary-container)",
               value: "12",
-              label: "Dalam Penanganan",
+              label: "In Progress",
             },
             {
               icon: "group",
               bg: "var(--color-primary-container)",
               fg: "var(--color-on-primary-container)",
               value: "850",
-              label: "Warga Aktif",
+              label: "Active Citizens",
             },
           ].map((stat) => (
             <div

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Dashboard — MalariaWatch Admin",
-  description: "Dashboard surveilans petugas kesehatan MalariaWatch.",
+  description: "MalariaWatch health worker surveillance dashboard.",
 };
 
 const areas = [
@@ -11,7 +11,7 @@ const areas = [
     name: "Kab. Asmat",
     region: "Papua Selatan",
     score: 92,
-    level: "Kritis",
+    level: "Critical",
     reports: 45,
     icon: "trending_up",
     borderColor: "var(--color-error)",
@@ -24,7 +24,7 @@ const areas = [
     name: "Kab. Mimika",
     region: "Papua Tengah",
     score: 85,
-    level: "Tinggi",
+    level: "High",
     reports: 32,
     icon: "warning",
     borderColor: "var(--color-error)",
@@ -37,7 +37,7 @@ const areas = [
     name: "Kab. Sumba Timur",
     region: "Nusa Tenggara Timur",
     score: 68,
-    level: "Sedang",
+    level: "Medium",
     reports: 12,
     icon: "info",
     borderColor: "#f59e0b",
@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
       >
         <span className="material-symbols-outlined filled-icon mr-2">warning</span>
         <span className="text-sm font-bold uppercase tracking-wide">
-          Cluster Risiko Tinggi Terdeteksi!
+          High Risk Cluster Detected!
         </span>
       </div>
 
@@ -198,7 +198,7 @@ export default function AdminDashboardPage() {
             <span className="material-symbols-outlined absolute left-2">search</span>
             <input
               className="pl-8 pr-4 py-2 rounded-full border text-sm outline-none transition-all w-64"
-              placeholder="Cari data..."
+              placeholder="Search data..."
               type="text"
               style={{
                 backgroundColor: "var(--color-surface-container-lowest)",
@@ -261,7 +261,7 @@ export default function AdminDashboardPage() {
                 }}
               >
                 <span className="material-symbols-outlined mr-1 text-lg">layers</span>
-                Data Endemisitas
+                Endemicity Data
               </button>
               <button
                 className="px-4 py-2 rounded-full shadow-md text-sm font-medium border flex items-center transition-colors opacity-70"
@@ -272,7 +272,7 @@ export default function AdminDashboardPage() {
                 }}
               >
                 <span className="material-symbols-outlined mr-1 text-lg">sync_alt</span>
-                Pola Migrasi
+                Migration Patterns
               </button>
             </div>
 
@@ -288,13 +288,13 @@ export default function AdminDashboardPage() {
                 className="text-xs font-semibold uppercase mb-1"
                 style={{ color: "var(--color-on-surface-variant)" }}
               >
-                Tingkat Risiko
+                Risk Level
               </h4>
               <ul className="space-y-1">
                 {[
-                  { color: "var(--color-error)", label: "Tinggi" },
-                  { color: "#f59e0b", label: "Sedang" },
-                  { color: "#10b981", label: "Rendah" },
+                  { color: "var(--color-error)", label: "High" },
+                  { color: "#f59e0b", label: "Medium" },
+                  { color: "#10b981", label: "Low" },
                 ].map((r) => (
                   <li key={r.label} className="flex items-center text-sm gap-2">
                     <span
@@ -315,7 +315,7 @@ export default function AdminDashboardPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzFfW9tTwhBd4JY9enx8uWWmJd-rIHHjgw1QsQbdynUXZsXbz8uA-BOEwbxJyqPKMlZggyN73iFZLDeighkxbNFhVx-wiPyn5T0PKmJ1_Wb7UdpRya09Z6eR0zrs2zULzi_C-_Qbu_x0ocglzGDs7GVoqx5Dw6NwBW9RcFrybINL-5ObrtTI8rpW_YncCZug5-0ZkCoTYcf_orLVujaxFA0gyQSdhf6lwLu4JGig8vtObqOfe8Re9dAA"
-                alt="Peta Indonesia"
+                alt="Map of Indonesia"
                 className="w-full h-full object-cover opacity-80"
               />
               {/* Markers */}
@@ -351,7 +351,7 @@ export default function AdminDashboardPage() {
                 className="text-xl font-bold"
                 style={{ color: "var(--color-on-surface)" }}
               >
-                Prioritas Wilayah
+                Regional Priority
               </h3>
               <button style={{ color: "var(--color-primary)" }}>
                 <span className="material-symbols-outlined">filter_list</span>
@@ -419,7 +419,7 @@ export default function AdminDashboardPage() {
                         className="text-xs mb-1"
                         style={{ color: "var(--color-on-surface-variant)" }}
                       >
-                        Laporan Baru
+                        New Reports
                       </p>
                       <p
                         className="text-lg font-semibold"
