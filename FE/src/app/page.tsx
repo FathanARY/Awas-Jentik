@@ -7,6 +7,8 @@ export const metadata = {
 };
 
 import Header from "@/components/Header";
+import LiveCommunityMap from "@/components/LiveCommunityMap";
+import FlyingMosquito from "@/components/FlyingMosquito";
 
 export default function HomePage() {
   return (
@@ -25,7 +27,8 @@ export default function HomePage() {
       <main className="max-w-5xl mx-auto px-6 pt-36 pb-28 md:pb-20">
         
         {/* Hero Section */}
-        <section className="flex flex-col items-center text-center mt-8 mb-20 md:mt-16 md:mb-24">
+        <section className="relative overflow-hidden flex flex-col items-center text-center mt-8 mb-20 md:mt-16 md:mb-24">
+          <FlyingMosquito />
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 max-w-3xl leading-[1.1] mb-6">
             Stop Malaria <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Before It Spreads.</span>
           </h1>
@@ -49,33 +52,13 @@ export default function HomePage() {
           {/* Card 1: Community Map (Spans 2 columns on desktop) */}
           <div className="md:col-span-2 rounded-3xl p-6 md:p-8 bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-100 to-transparent opacity-50 rounded-bl-full pointer-events-none" />
-            <div className="flex justify-between items-start mb-6 relative z-10">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-xl">map</span>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Live Community Map</h2>
-                <p className="text-slate-500 font-medium">Tracking hotspots in real-time.</p>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white shadow-sm border border-slate-100">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-xs font-bold text-slate-700">3 Active Hotspots</span>
-              </div>
-            </div>
+
             
-            <div className="w-full h-48 md:h-64 rounded-2xl overflow-hidden border border-slate-200 relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfXV87APQ-roIxUdWzBdwENFHnv6MDTppT8YoH5osci4yeFwNdocA7w9y8EIPM9-6e21NLs7NZampfV3ZNvPYuTu18nTRq9QVOCFUNLE7sUV1rxwevx8f4H8tUfCLBq_5FenCGEEHJ66AmHZbQ3dEq27prM805i36ZJWwQpUg9yar2orsNwU1GtQZsvS_qiGljOE-60o7PRAgAtpeHBP-LnlpHjkGyXOYiWK8me-qsirCqQ4XRVAc4aw"
-                alt="Community Map Preview"
-                className="w-full h-full object-cover filter brightness-[1.05] contrast-[1.05] group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent" />
-            </div>
+            <LiveCommunityMap />
           </div>
 
           {/* Card 2: Quick Stats */}
-          <div className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+          <div className="self-start rounded-3xl p-6 md:p-8 bg-gradient-to-br from-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
             <div className="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500 rounded-full blur-3xl opacity-30 pointer-events-none" />
             <div>
               <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-indigo-300">
