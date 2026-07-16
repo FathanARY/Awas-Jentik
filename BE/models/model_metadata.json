@@ -1,0 +1,30 @@
+{
+  "w_habitat": 0.65,
+  "w_mobility": 0.2,
+  "w_case": 0.15,
+  "case_score_multiplier": 16,
+  "habitat_features": [
+    "Persentase_Lumut",
+    "Persentase_Vegetasi",
+    "Air_Tenang_bin",
+    "Paparan_ord",
+    "Luas_Genangan_m2",
+    "Curah_Hujan_30_Hari_mm",
+    "Jarak_Hutan_m",
+    "Jarak_Sawah_m",
+    "Jarak_Sungai_m",
+    "Jarak_Rawa_m",
+    "Jarak_Tambang_m",
+    "Jarak_Permukiman_m",
+    "Jarak_Puskesmas_m"
+  ],
+  "mobility_features": [
+    "Pendatang_30_Hari",
+    "Pendatang_Dari_Endemis",
+    "Pekerja_Mobil",
+    "Riwayat_Perjalanan_Endemis"
+  ],
+  "habitat_r2": 0.924,
+  "mobility_r2": 0.639,
+  "combined_validation_r2": 0.927
+}
