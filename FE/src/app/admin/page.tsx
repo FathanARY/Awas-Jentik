@@ -1,10 +1,10 @@
+"use client";
+
 import Header from "@/components/Header";
 import Link from "next/link";
-
-export const metadata = {
-  title: "Dashboard — MalariaWatch Admin",
-  description: "MalariaWatch health worker surveillance dashboard.",
-};
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const areas = [
   {
@@ -49,6 +49,23 @@ const areas = [
 ];
 
 export default function AdminDashboardPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && (!user || user.role !== "admin")) {
+      router.push("/");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user || user.role !== "admin") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="flex min-h-dvh"

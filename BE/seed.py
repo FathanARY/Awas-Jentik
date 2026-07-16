@@ -9,7 +9,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from sqlmodel import Session, SQLModel, select
 from app.database import engine
 from app.models.laporan import Laporan
+from app.models.user import User
 from app.services import predict_risk
+from app.services.auth import get_password_hash
 
 LAT_BASE = -6.200000
 LNG_BASE = 106.816666
@@ -20,6 +22,15 @@ DESA_NAMES = [
 ]
 
 def seed_demo(session: Session):
+    existing_user = session.exec(select(User).limit(1)).first()
+    if not existing_user:
+        admin = User(username="admin", password_hash=get_password_hash("password123"), role="admin")
+        user = User(username="user", password_hash=get_password_hash("password123"), role="user")
+        session.add(admin)
+        session.add(user)
+        session.commit()
+        print("Seeded default users (admin, user).")
+
     existing = session.exec(select(Laporan).limit(1)).all()
     if existing:
         print("Database sudah berisi data. Lewati seeding.")

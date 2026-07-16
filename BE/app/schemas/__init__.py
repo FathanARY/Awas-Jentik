@@ -32,6 +32,9 @@ class LaporRequest(BaseModel):
     kasus_malaria_1km_30hari: int = Field(default=0, ge=0)
     lat: Optional[float] = None
     lng: Optional[float] = None
+    grid_x: Optional[int] = None
+    grid_y: Optional[int] = None
+    grid_land: Optional[str] = None
 
 
 class PredictRequest(BaseModel):
@@ -58,6 +61,9 @@ class LaporanResponse(BaseModel):
     lng: Optional[float] = None
     alamat: Optional[str] = None
     foto_path: Optional[str] = None
+    grid_x: Optional[int] = None
+    grid_y: Optional[int] = None
+    grid_land: Optional[str] = None
     habitat_risk_score: Optional[float] = None
     habitat_category: Optional[str] = None
     mobility_risk_score: Optional[float] = None

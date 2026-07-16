@@ -14,6 +14,10 @@ class Laporan(SQLModel, table=True):
     lat: Optional[float] = None
     lng: Optional[float] = None
     alamat: Optional[str] = None
+    
+    grid_x: Optional[int] = None
+    grid_y: Optional[int] = None
+    grid_land: Optional[str] = None
 
     foto_path: Optional[str] = None
 

@@ -90,7 +90,7 @@ export default function LaporPage() {
                   <label className="block text-sm font-bold text-slate-700 mb-2">Moss Percentage (0-100%)</label>
                   <p className="text-xs text-slate-500 mb-3">Higher indicates puddle has been formed for a long time.</p>
                   <div className="relative">
-                    <input type="number" min="0" max="100" name="moss_percentage" placeholder="e.g. 68" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required />
+                    <input type="number" min="0" max="100" name="persentase_lumut" placeholder="e.g. 68" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-500 font-bold">%</div>
                   </div>
                 </div>
@@ -99,7 +99,7 @@ export default function LaporPage() {
                   <label className="block text-sm font-bold text-slate-700 mb-2">Vegetation (0-100%)</label>
                   <p className="text-xs text-slate-500 mb-3">Percentage of vegetation around puddle.</p>
                   <div className="relative">
-                    <input type="number" min="0" max="100" name="vegetation_percentage" placeholder="e.g. 75" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required />
+                    <input type="number" min="0" max="100" name="persentase_vegetasi" placeholder="e.g. 75" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-500 font-bold">%</div>
                   </div>
                 </div>
@@ -108,7 +108,7 @@ export default function LaporPage() {
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-3">Puddle Area</label>
                     <div className="relative">
-                      <input type="number" min="0" step="any" name="area" placeholder="e.g. 14" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required />
+                      <input type="number" min="0" step="any" name="luas_genangan_m2" placeholder="e.g. 14" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" required />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-500 font-bold">m²</div>
                     </div>
                   </div>
@@ -142,7 +142,7 @@ export default function LaporPage() {
                       { value: "no", label: "No" },
                     ].map((opt, i) => (
                       <label key={opt.value} className="flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border border-slate-200 bg-white cursor-pointer group hover:border-blue-300 transition-colors">
-                        <input className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500" name="still_water" type="radio" value={opt.value} defaultChecked={i === 0} />
+                        <input className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500" name="air_tenang" type="radio" value={opt.value} defaultChecked={i === 0} />
                         <span className="text-slate-700 font-medium group-hover:text-slate-900 transition-colors">{opt.label}</span>
                       </label>
                     ))}
@@ -158,7 +158,7 @@ export default function LaporPage() {
                       { value: "high", label: "High" },
                     ].map((opt, i) => (
                       <label key={opt.value} className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-white cursor-pointer group hover:border-blue-300 transition-colors">
-                        <input className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500" name="sun_exposure" type="radio" value={opt.value} defaultChecked={i === 1} />
+                        <input className="w-5 h-5 text-blue-600 border-slate-300 focus:ring-blue-500" name="paparan_matahari" type="radio" value={opt.value} defaultChecked={i === 1} />
                         <span className="text-slate-700 font-medium group-hover:text-slate-900 transition-colors">{opt.label}</span>
                       </label>
                     ))}
