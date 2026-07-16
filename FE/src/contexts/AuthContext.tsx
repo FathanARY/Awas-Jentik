@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 export interface User {
   id: number;
-  username: str;
+  username: string;
   role: string;
 }
 
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("mw_access_token");
+    const storedToken = localStorage.getItem("access_token");
     if (storedToken) {
       setToken(storedToken);
       fetch("http://localhost:8000/api/auth/me", {
@@ -51,13 +51,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (newToken: string, newUser: User) => {
-    localStorage.setItem("mw_access_token", newToken);
+    localStorage.setItem("access_token", newToken);
     setToken(newToken);
     setUser(newUser);
   };
 
   const logout = () => {
-    localStorage.removeItem("mw_access_token");
+    localStorage.removeItem("access_token");
     setToken(null);
     setUser(null);
   };
