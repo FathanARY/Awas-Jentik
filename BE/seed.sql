@@ -1,10 +1,13 @@
--- MalariaWatch Seed Data
--- Generated: 2026-07-16T22:10:21.250862
+-- ============================================================
+-- MalariaWatch — Seed Data
+-- Run AFTER schema.sql
+-- Users: admin / password123, user / password123
+-- ============================================================
 
--- Users (password: password123)
 INSERT INTO users (username, password_hash, role) VALUES
 ('admin', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'admin'),
-('user', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'user');
+('user', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'user')
+ON CONFLICT (username) DO NOTHING;
 
 -- Laporan (9 demo reports)
 INSERT INTO laporan (kode_laporan, status, created_at, lat, lng, alamat,
