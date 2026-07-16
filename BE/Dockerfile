@@ -2,10 +2,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY BE/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY BE/ .
+COPY BE/models/ ./models/
+COPY BE/data/ ./data/
 
 RUN mkdir -p uploads
 
