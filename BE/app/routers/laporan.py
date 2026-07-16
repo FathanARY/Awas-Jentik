@@ -8,12 +8,15 @@ from pydantic import BaseModel
 from app.database import get_session
 from app.models.laporan import Laporan
 from app.models.pcam import RiwayatRisiko
+from app.models.user import User
+from app.services.auth import get_current_kader
 from app.schemas import LaporRequest, LaporanResponse, LaporanDetailResponse, TindakanRequest
 from app.services import predict_risk, reverse_geocode
 from app.services.smoothing import (
     ema_smooth, skor_ke_kategori, batasi_lompatan,
     simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
 )
+from app.routers.notifications import trigger_notifikasi
 from app.config import UPLOAD_DIR
 
 router = APIRouter(prefix="/api", tags=["laporan"])
@@ -163,6 +166,7 @@ async def update_tindakan(
     kode_laporan: str,
     body: TindakanRequest,
     session: Session = Depends(get_session),
+    kader: User = Depends(get_current_kader),
 ):
     import datetime
 
@@ -190,6 +194,7 @@ async def verify_laporan(
     kode_laporan: str,
     body: VerifyRequest,
     session: Session = Depends(get_session),
+    kader: User = Depends(get_current_kader),
 ):
     stmt = select(Laporan).where(Laporan.kode_laporan == kode_laporan)
     laporan = session.exec(stmt).first()
@@ -223,6 +228,10 @@ async def verify_laporan(
         sumber=f"Verifikasi: {kode_laporan}",
         detail=f"diverifikasi oleh {body.diverifikasi_oleh or 'kader'}, n={n}",
     )
+
+    from app.services.smoothing import kategori_naik
+    if kategori_naik(kategori_lama, kategori_final):
+        trigger_notifikasi(session, grid_id, kategori_lama, kategori_final, f"Verifikasi: {kode_laporan}")
 
     laporan.status = "terverifikasi"
     laporan.diverifikasi_oleh = body.diverifikasi_oleh
