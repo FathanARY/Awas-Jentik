@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import Link from "next/link";
 
 export const metadata = {
@@ -68,16 +69,46 @@ export default function AdminDashboardPage() {
         </span>
       </div>
 
+      <Header 
+        leftContent={
+          <div className="font-extrabold tracking-tight text-lg text-slate-900 flex items-center gap-2.5">
+            Admin Dashboard
+          </div>
+        }
+        rightContent={
+          <div className="flex items-center gap-4">
+            <div className="relative hidden md:flex items-center text-slate-500">
+              <span className="material-symbols-outlined absolute left-2">search</span>
+              <input
+                className="pl-8 pr-4 py-2 rounded-full border border-slate-200 bg-white/50 text-sm outline-none transition-all w-64 focus:bg-white"
+                placeholder="Search data..."
+                type="text"
+              />
+            </div>
+            <button className="p-2 rounded-full text-slate-600 hover:text-blue-600 transition-colors relative">
+              <span className="material-symbols-outlined">notifications</span>
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500" />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAza4dAlhNHG15GBa7SuVYmgB2R7x7sWS7pLuy4x6llcKHX3cS8jT7eaU0e7mzeTf7-pBV3iTAfeuZ_siENuL5vEcASlFDr0OekQ4V-GaQAg-V8AXVBmWBYq0gaT3gb1qlcQEysFMuRm2uYS16sH2FnCctpS5oRWPECF7LBs7UaCuCrt7To0rpI3JpRpeJvyrj5bBXwigtV9fnPnrphEupFWM4gBIH9MmoCOeoXh2Uy2lkSocWfdFreOQ"
+              alt="Health Worker Avatar"
+              className="w-8 h-8 rounded-full object-cover border border-slate-200 ml-2"
+            />
+          </div>
+        }
+      />
+
       {/* Sidebar */}
       <aside
-        className="fixed left-0 top-0 h-full flex flex-col py-8 px-4 w-64 z-40 border-r pt-20"
+        className="fixed left-0 top-0 h-full flex flex-col py-8 px-4 w-64 z-40 border-r pt-24"
         style={{
           backgroundColor: "var(--color-surface-container-low)",
           borderColor: "var(--color-outline-variant)",
           color: "var(--color-primary)",
         }}
       >
-        <div className="mb-8">
+        <div className="mb-8 mt-12">
           <h1
             className="text-2xl font-extrabold mb-1"
             style={{ color: "var(--color-primary)" }}
@@ -176,68 +207,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </aside>
-
-      {/* Top Nav */}
-      <header
-        className="fixed top-0 right-0 z-30 flex justify-between items-center px-6 h-16 border-b w-[calc(100%-256px)] pt-10"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          borderColor: "var(--color-outline-variant)",
-        }}
-      >
-        <div className="flex items-center flex-1 mt-10">
-          <h2
-            className="text-xl font-bold"
-            style={{ color: "var(--color-primary)" }}
-          >
-            Main Overview
-          </h2>
-        </div>
-        <div className="flex items-center gap-4 mt-10">
-          <div className="relative hidden md:flex items-center" style={{ color: "var(--color-on-surface-variant)" }}>
-            <span className="material-symbols-outlined absolute left-2">search</span>
-            <input
-              className="pl-8 pr-4 py-2 rounded-full border text-sm outline-none transition-all w-64"
-              placeholder="Search data..."
-              type="text"
-              style={{
-                backgroundColor: "var(--color-surface-container-lowest)",
-                borderColor: "var(--color-outline-variant)",
-                color: "var(--color-on-surface)",
-              }}
-            />
-          </div>
-          <button
-            className="p-2 rounded-full transition-colors"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined">warning</span>
-          </button>
-          <button
-            className="p-2 rounded-full transition-colors relative"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined">notifications</span>
-            <span
-              className="absolute top-1 right-1 w-2 h-2 rounded-full"
-              style={{ backgroundColor: "var(--color-error)" }}
-            />
-          </button>
-          <button
-            className="p-2 rounded-full transition-colors"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined">apps</span>
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAza4dAlhNHG15GBa7SuVYmgB2R7x7sWS7pLuy4x6llcKHX3cS8jT7eaU0e7mzeTf7-pBV3iTAfeuZ_siENuL5vEcASlFDr0OekQ4V-GaQAg-V8AXVBmWBYq0gaT3gb1qlcQEysFMuRm2uYS16sH2FnCctpS5oRWPECF7LBs7UaCuCrt7To0rpI3JpRpeJvyrj5bBXwigtV9fnPnrphEupFWM4gBIH9MmoCOeoXh2Uy2lkSocWfdFreOQ"
-            alt="Health Worker Avatar"
-            className="w-8 h-8 rounded-full object-cover border ml-2"
-            style={{ borderColor: "var(--color-outline-variant)" }}
-          />
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="ml-64 pt-28 p-12 min-h-screen w-full">

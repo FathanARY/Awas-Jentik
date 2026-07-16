@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import Link from "next/link";
 
 export function generateStaticParams() {
@@ -32,55 +33,37 @@ export default async function AdminLaporanDetailPage({
       className="flex flex-col min-h-dvh"
       style={{ backgroundColor: "var(--color-background)" }}
     >
-      {/* Contextual Header */}
-      <header
-        className="sticky top-0 z-40 border-b"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          borderColor: "var(--color-outline-variant)",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 md:px-12 h-16 flex items-center justify-between">
+      <Header
+        leftContent={
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
               aria-label="Back"
-              className="p-2 -ml-2 rounded-full transition-colors flex items-center"
-              style={{ color: "var(--color-on-surface)" }}
+              className="p-2 -ml-2 rounded-full transition-colors flex items-center text-slate-900 hover:bg-slate-100 group"
             >
-              <span className="material-symbols-outlined text-2xl">
+              <span className="material-symbols-outlined text-2xl group-hover:-translate-x-0.5 transition-transform">
                 arrow_back
               </span>
             </Link>
             <div>
-              <h1
-                className="text-xl font-semibold"
-                style={{ color: "var(--color-on-surface)" }}
-              >
+              <h1 className="text-xl font-bold text-slate-900">
                 Report Detail #{id}
               </h1>
-              <p
-                className="text-xs"
-                style={{ color: "var(--color-on-surface-variant)" }}
-              >
+              <p className="text-xs font-medium text-slate-500">
                 Sukamaju Village • Uploaded 24 Oct 2023, 14:30 WIB
               </p>
             </div>
           </div>
+        }
+        rightContent={
           <div className="hidden md:flex items-center gap-2">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
-              style={{
-                backgroundColor: "var(--color-surface-container-highest)",
-                color: "var(--color-on-surface-variant)",
-              }}
-            >
+            <span className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 bg-amber-100 text-amber-700 border border-amber-200">
               <span className="material-symbols-outlined text-sm">sync</span>
               Pending Action
             </span>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       {/* Main */}
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 md:px-12 py-6 md:py-8">

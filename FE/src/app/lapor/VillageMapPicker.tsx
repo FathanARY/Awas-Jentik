@@ -263,91 +263,97 @@ export default function VillageMapPicker({ onSelect, selected }: VillageMapPicke
   ];
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      {/* Canvas */}
-      <div ref={containerRef} className="relative w-full">
+    <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+      {/* Map Area */}
+      <div ref={containerRef} className="relative w-full lg:flex-1">
         <canvas
           ref={canvasRef}
-          className="w-full rounded-lg border cursor-crosshair block"
-          style={{ borderColor: "var(--color-outline-variant)", imageRendering: "pixelated" }}
+          className="w-full rounded-2xl border border-slate-200 shadow-sm cursor-crosshair block"
+          style={{ imageRendering: "pixelated" }}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setHovered(null)}
           onClick={handleClick}
         />
 
-        {/* Hover tooltip */}
-        {hovered && (
-          <div
-            className="pointer-events-none absolute top-2 left-2 rounded-lg px-3 py-2 shadow-xl text-xs backdrop-blur-sm"
-            style={{ backgroundColor: "rgba(10,10,10,0.82)", color: "#fff", lineHeight: 1.75 }}
-          >
-            <div className="font-bold text-sm">Grid ({hovered.x}, {hovered.y})</div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0 border border-white/20"
-                style={{ backgroundColor: LAND_COLORS[hovered.land] }} />
-              {LAND_LABELS[hovered.land]}
-            </div>
-            {hovered.special === "puskesmas" && <div className="text-red-300 font-bold">🏥 Health Center</div>}
-            {hovered.special === "school"    && <div className="text-blue-300 font-bold">🏫 School</div>}
-            <div className="opacity-60 text-[10px]">
-              ~{(hovered.x - 1) * 100}m E, {(hovered.y - 1) * 100}m S from top-left corner
-            </div>
-          </div>
-        )}
-
         {/* Hint overlay */}
         {!selected && (
-          <div className="pointer-events-none absolute bottom-2 right-2 rounded px-2 py-1 text-[10px]"
-            style={{ backgroundColor: "rgba(0,0,0,0.55)", color: "#fff" }}>
+          <div className="pointer-events-none absolute bottom-3 right-3 rounded-md px-3 py-1.5 text-xs font-medium bg-slate-900/60 text-white backdrop-blur-md">
             Click grid to select location
           </div>
         )}
       </div>
 
-      {/* Selected info bar */}
-      {selected && (
-        <div className="flex items-center justify-between rounded-lg px-4 py-3 border text-sm"
-          style={{
-            backgroundColor: "var(--color-primary-container)",
-            borderColor: "var(--color-primary)",
-            color: "var(--color-on-primary-container)",
-          }}>
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-base">location_on</span>
-            <div>
-              <span className="font-bold">Grid ({selected.x}, {selected.y})</span>
-              <span className="mx-2 opacity-40">·</span>
-              <span className="inline-block w-2.5 h-2.5 rounded-sm mr-1 align-middle border border-black/10"
-                style={{ backgroundColor: LAND_COLORS[selected.land] }} />
-              {LAND_LABELS[selected.land]}
-              <div className="text-xs opacity-60 mt-0.5">
-                ≈ {(selected.x - 1) * 100}m East · {(selected.y - 1) * 100}m South from village origin
+      {/* Info Panel (Right Side) */}
+      <div className="w-full lg:w-72 flex flex-col gap-6 shrink-0">
+        
+        {/* Dynamic Info Box */}
+        <div className="rounded-2xl p-5 border border-slate-200 bg-slate-50/50 shadow-sm min-h-[160px] flex flex-col justify-center transition-all">
+          {selected ? (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-slate-900 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-blue-600">location_on</span>
+                  Selected: ({selected.x}, {selected.y})
+                </span>
+                <button type="button" onClick={() => onSelect(null)} className="text-xs font-semibold text-slate-500 hover:text-rose-600 transition-colors">
+                  Clear
+                </button>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <span className="w-3 h-3 rounded-sm shadow-sm border border-slate-200" style={{ backgroundColor: LAND_COLORS[selected.land] }} />
+                {LAND_LABELS[selected.land]}
+              </div>
+              <div className="text-xs text-slate-500 leading-relaxed bg-white p-2 rounded-lg border border-slate-100 mt-1">
+                ≈ {(selected.x - 1) * 100}m East, {(selected.y - 1) * 100}m South from origin
               </div>
             </div>
-          </div>
-          <button type="button" onClick={() => onSelect(null)}
-            className="text-xs underline opacity-50 hover:opacity-100 ml-4 flex-shrink-0">
-            Clear
-          </button>
+          ) : hovered ? (
+            <div className="flex flex-col gap-3">
+              <span className="font-bold text-slate-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-slate-400">my_location</span>
+                Hovering: ({hovered.x}, {hovered.y})
+              </span>
+              <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <span className="w-3 h-3 rounded-sm shadow-sm border border-slate-200" style={{ backgroundColor: LAND_COLORS[hovered.land] }} />
+                {LAND_LABELS[hovered.land]}
+              </div>
+              {(hovered.special === "puskesmas" || hovered.special === "school") && (
+                <div className="flex flex-col gap-1 mt-1">
+                  {hovered.special === "puskesmas" && <div className="text-rose-600 font-bold text-sm flex items-center gap-1"><span className="material-symbols-outlined text-sm">local_hospital</span> Health Center</div>}
+                  {hovered.special === "school"    && <div className="text-blue-600 font-bold text-sm flex items-center gap-1"><span className="material-symbols-outlined text-sm">school</span> School</div>}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center text-slate-500 flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-1">
+                <span className="material-symbols-outlined text-2xl">touch_app</span>
+              </div>
+              <p className="text-sm font-medium">Hover map to view details,<br/>click to select.</p>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px]">
-        {legend.map(({ land }) => (
-          <div key={land} className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm flex-shrink-0 border border-black/10"
-              style={{ backgroundColor: LAND_COLORS[land] }} />
-            <span style={{ color: "var(--color-on-surface-variant)" }}>{LAND_LABELS[land]}</span>
+        {/* Legend */}
+        <div className="rounded-2xl p-5 border border-slate-200 bg-white shadow-sm">
+          <h4 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest">Map Legend</h4>
+          <div className="grid grid-cols-2 gap-y-3.5 gap-x-4 text-sm font-medium text-slate-700">
+            {legend.map(({ land }) => (
+              <div key={land} className="flex items-center gap-3 group">
+                <span className="w-4 h-4 rounded-md shadow-sm border border-slate-200 group-hover:scale-110 transition-transform" style={{ backgroundColor: LAND_COLORS[land] }} />
+                {LAND_LABELS[land]}
+              </div>
+            ))}
+            <div className="h-px w-full bg-slate-100 my-1 col-span-2" />
+            <div className="flex items-center gap-3 group">
+              <span className="w-4 h-4 rounded-full bg-rose-600 flex items-center justify-center text-[10px] text-white font-bold shadow-sm group-hover:scale-110 transition-transform">+</span>
+              Health Center
+            </div>
+            <div className="flex items-center gap-3 group">
+              <span className="w-4 h-4 rounded-full bg-blue-700 flex items-center justify-center text-[10px] text-white font-bold shadow-sm group-hover:scale-110 transition-transform">S</span>
+              School (2)
+            </div>
           </div>
-        ))}
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-red-600 flex items-center justify-center text-[7px] text-white font-bold flex-shrink-0">+</span>
-          <span style={{ color: "var(--color-on-surface-variant)" }}>Health Center</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-blue-700 flex items-center justify-center text-[7px] text-white font-bold flex-shrink-0">S</span>
-          <span style={{ color: "var(--color-on-surface-variant)" }}>School (2)</span>
         </div>
       </div>
     </div>
