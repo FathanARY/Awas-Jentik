@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { apiPostForm } from "../api";
 import VillageMapPicker, { type SelectedCell } from "./VillageMapPicker";
 
 import Header from "@/components/Header";
@@ -10,10 +11,65 @@ import Header from "@/components/Header";
 export default function LaporPage() {
   const router = useRouter();
   const [selectedGrid, setSelectedGrid] = useState<SelectedCell | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    router.push("/lapor/sukses");
+    setSubmitting(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    const paparanMap: Record<string, string> = {
+      low: "Rendah",
+      medium: "Sedang",
+      high: "Tinggi",
+    };
+    const airMap: Record<string, string> = {
+      yes: "Ya",
+      no: "Tidak",
+    };
+
+    const paparanVal = fd.get("paparan_matahari") as string;
+    const airVal = fd.get("air_tenang") as string;
+
+    fd.set("air_tenang", airMap[airVal] || "Tidak");
+    fd.set("paparan_matahari", paparanMap[paparanVal] || "Sedang");
+
+    fd.append("curah_hujan_30_hari_mm", "300");
+    fd.append("jarak_hutan_m", "100");
+    fd.append("jarak_sawah_m", "500");
+    fd.append("jarak_sungai_m", "400");
+    fd.append("jarak_rawa_m", "1000");
+    fd.append("jarak_tambang_m", "3000");
+    fd.append("jarak_permukiman_m", "200");
+    fd.append("jarak_puskesmas_m", "2000");
+    fd.append("pendatang_30_hari", "3");
+    fd.append("pendatang_dari_endemis", "1");
+    fd.append("pekerja_mobil", "2");
+    fd.append("riwayat_perjalanan_endemis", "0");
+    fd.append("kasus_malaria_1km_30hari", "0");
+
+    try {
+      const pos: GeolocationPosition = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
+      );
+      fd.append("lat", String(pos.coords.latitude));
+      fd.append("lng", String(pos.coords.longitude));
+    } catch {
+      fd.append("lat", "-6.200000");
+      fd.append("lng", "106.816666");
+    }
+
+    try {
+      const result = await apiPostForm<{ kode_laporan: string }>("/lapor", fd);
+      router.push(`/lapor/sukses?kode=${result.kode_laporan}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal mengirim laporan");
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -187,19 +243,25 @@ export default function LaporPage() {
               <p className="text-sm text-slate-500 font-medium">
                 Ensure the puddle is clearly visible along with its surrounding area.
               </p>
-              <input accept="image/*" capture="environment" className="hidden" type="file" />
+              <input accept="image/*" capture="environment" className="hidden" type="file" name="foto" />
             </label>
           </section>
 
           {/* Submit */}
-          <div className="pt-4 flex justify-end">
+          <div className="pt-4 flex flex-col items-end gap-3">
+            {error && (
+              <div className="w-full px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               id="submit-laporan"
-              className="group w-full md:w-auto px-10 py-4 rounded-full bg-slate-900 text-white font-bold text-sm shadow-xl shadow-slate-900/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+              disabled={submitting}
+              className="group w-full md:w-auto px-10 py-4 rounded-full bg-slate-900 text-white font-bold text-sm shadow-xl shadow-slate-900/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Submit Report
-              <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">send</span>
+              {submitting ? "Mengirim..." : "Submit Report"}
+              <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">{submitting ? "hourglass_top" : "send"}</span>
             </button>
           </div>
         </form>

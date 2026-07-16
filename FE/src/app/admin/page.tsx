@@ -4,59 +4,47 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../api";
 
-const areas = [
-  {
-    id: "MW-2023-089",
-    name: "Kab. Asmat",
-    region: "Papua Selatan",
-    score: 92,
-    level: "Critical",
-    reports: 45,
-    icon: "trending_up",
-    borderColor: "var(--color-error)",
-    chipBg: "var(--color-error-container)",
-    chipFg: "var(--color-on-error-container)",
-    scoreFg: "var(--color-error)",
-  },
-  {
-    id: "MW-2023-090",
-    name: "Kab. Mimika",
-    region: "Papua Tengah",
-    score: 85,
-    level: "High",
-    reports: 32,
-    icon: "warning",
-    borderColor: "var(--color-error)",
-    chipBg: "var(--color-error-container)",
-    chipFg: "var(--color-on-error-container)",
-    scoreFg: "var(--color-error)",
-  },
-  {
-    id: "MW-2023-091",
-    name: "Kab. Sumba Timur",
-    region: "Nusa Tenggara Timur",
-    score: 68,
-    level: "Medium",
-    reports: 12,
-    icon: "info",
-    borderColor: "#f59e0b",
-    chipBg: "#fef3c7",
-    chipFg: "#92400e",
-    scoreFg: "#b45309",
-  },
-];
+interface AreaItem {
+  id: string;
+  name: string;
+  region: string;
+  score: number;
+  level: string;
+  reports: number;
+}
+
+interface StatsItem {
+  total_laporan: number;
+  laporan_menunggu: number;
+  laporan_ditindaklanjuti: number;
+  rata_rata_risiko: number;
+}
+
+function getAreaStyle(score: number) {
+  if (score >= 80) return { borderColor: "var(--color-error)", chipBg: "var(--color-error-container)", chipFg: "var(--color-on-error-container)", scoreFg: "var(--color-error)", icon: "trending_up" };
+  if (score >= 60) return { borderColor: "#f59e0b", chipBg: "#fef3c7", chipFg: "#92400e", scoreFg: "#b45309", icon: "warning" };
+  return { borderColor: "#10b981", chipBg: "#d1fae5", chipFg: "#065f46", scoreFg: "#059669", icon: "info" };
+}
 
 export default function AdminDashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [areas, setAreas] = useState<AreaItem[]>([]);
+  const [stats, setStats] = useState<StatsItem | null>(null);
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
       router.push("/");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    apiFetch<AreaItem[]>("/areas").then(setAreas).catch(() => {});
+    apiFetch<StatsItem>("/stats").then(setStats).catch(() => {});
+  }, []);
 
   if (loading || !user || user.role !== "admin") {
     return (
@@ -344,14 +332,16 @@ export default function AdminDashboardPage() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              {areas.map((area) => (
+              {areas.map((area) => {
+                const style = getAreaStyle(area.score);
+                return (
                 <Link
                   key={area.id}
                   href={`/admin/laporan/${area.id}`}
                   className="block p-4 rounded-xl shadow-sm border-l-4 border-y border-r hover:shadow-md transition-shadow cursor-pointer"
                   style={{
                     backgroundColor: "var(--color-surface)",
-                    borderLeftColor: area.borderColor,
+                    borderLeftColor: style.borderColor,
                     borderTopColor: "var(--color-outline-variant)",
                     borderRightColor: "var(--color-outline-variant)",
                     borderBottomColor: "var(--color-outline-variant)",
@@ -359,64 +349,26 @@ export default function AdminDashboardPage() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h4
-                        className="text-base font-bold"
-                        style={{ color: "var(--color-on-surface)" }}
-                      >
-                        {area.name}
-                      </h4>
-                      <p
-                        className="text-sm"
-                        style={{ color: "var(--color-on-surface-variant)" }}
-                      >
-                        {area.region}
-                      </p>
+                      <h4 className="text-base font-bold" style={{ color: "var(--color-on-surface)" }}>{area.name}</h4>
+                      <p className="text-sm" style={{ color: "var(--color-on-surface-variant)" }}>{area.region}</p>
                     </div>
-                    <span
-                      className="px-2 py-1 rounded text-xs font-bold flex items-center"
-                      style={{
-                        backgroundColor: area.chipBg,
-                        color: area.chipFg,
-                      }}
-                    >
-                      <span className="material-symbols-outlined text-sm mr-1">
-                        {area.icon}
-                      </span>
+                    <span className="px-2 py-1 rounded text-xs font-bold flex items-center" style={{ backgroundColor: style.chipBg, color: style.chipFg }}>
+                      <span className="material-symbols-outlined text-sm mr-1">{style.icon}</span>
                       {area.level}
                     </span>
                   </div>
                   <div className="flex justify-between items-end mt-4">
                     <div>
-                      <p
-                        className="text-xs mb-1"
-                        style={{ color: "var(--color-on-surface-variant)" }}
-                      >
-                        Risk Score
-                      </p>
-                      <p
-                        className="text-xl font-bold"
-                        style={{ color: area.scoreFg }}
-                      >
-                        {area.score}/100
-                      </p>
+                      <p className="text-xs mb-1" style={{ color: "var(--color-on-surface-variant)" }}>Risk Score</p>
+                      <p className="text-xl font-bold" style={{ color: style.scoreFg }}>{area.score}/100</p>
                     </div>
                     <div className="text-right">
-                      <p
-                        className="text-xs mb-1"
-                        style={{ color: "var(--color-on-surface-variant)" }}
-                      >
-                        New Reports
-                      </p>
-                      <p
-                        className="text-lg font-semibold"
-                        style={{ color: "var(--color-on-surface)" }}
-                      >
-                        {area.reports}
-                      </p>
+                      <p className="text-xs mb-1" style={{ color: "var(--color-on-surface-variant)" }}>New Reports</p>
+                      <p className="text-lg font-semibold" style={{ color: "var(--color-on-surface)" }}>{area.reports}</p>
                     </div>
                   </div>
                 </Link>
-              ))}
+              )})}
             </div>
           </div>
         </div>
