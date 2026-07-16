@@ -66,7 +66,7 @@ function getAreaStyle(score: number) {
 }
 
 export default function AdminDashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [areas, setAreas] = useState<AreaItem[]>([]);
   const [stats, setStats] = useState<StatsItem | null>(null);
@@ -152,6 +152,7 @@ export default function AdminDashboardPage() {
       style={{ backgroundColor: "var(--color-background)" }}
     >
       {/* Alert Banner */}
+      {changes.length > 0 && (
       <div
         className="fixed top-0 left-0 w-full z-[60] py-2 px-6 flex items-center justify-center shadow-lg"
         style={{
@@ -165,6 +166,7 @@ export default function AdminDashboardPage() {
           High Risk Cluster Detected!
         </span>
       </div>
+      )}
 
       <Header 
         leftContent={
@@ -246,6 +248,7 @@ export default function AdminDashboardPage() {
         <nav className="flex-1 space-y-2">
           <a
             href="#"
+            onClick={(e) => { e.preventDefault(); setActiveTab("priority"); }}
             className="flex items-center px-2 py-3 rounded-l-md font-bold border-r-4 transition-all"
             style={{
               color: "var(--color-primary)",
@@ -256,74 +259,58 @@ export default function AdminDashboardPage() {
             <span className="material-symbols-outlined mr-4">dashboard</span>
             <span className="text-sm">Dashboard</span>
           </a>
-          <a
-            href="#"
-            className="flex items-center px-2 py-3 rounded-l-md transition-all"
+          <button
+            onClick={() => setActiveTab("laporan")}
+            className="w-full text-left flex items-center px-2 py-3 rounded-l-md transition-all"
             style={{ color: "var(--color-on-surface-variant)" }}
           >
             <span className="material-symbols-outlined mr-4">description</span>
             <span className="text-sm">Reports</span>
-          </a>
-          <a
-            href="#"
-            className="flex items-center px-2 py-3 rounded-l-md transition-all"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-4">explore</span>
-            <span className="text-sm">Map View</span>
-          </a>
-          <a
-            href="#"
-            className="flex items-center px-2 py-3 rounded-l-md transition-all"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-4">leaderboard</span>
-            <span className="text-sm">Analytics</span>
-          </a>
-          <a
-            href="#"
-            className="flex items-center px-2 py-3 rounded-l-md transition-all"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-4">settings</span>
-            <span className="text-sm">Settings</span>
-          </a>
-        </nav>
-        <div className="mt-auto pt-6">
+          </button>
           <button
+            onClick={() => setActiveTab("changes")}
+            className="w-full text-left flex items-center px-2 py-3 rounded-l-md transition-all"
+            style={{ color: "var(--color-on-surface-variant)" }}
+          >
+            <span className="material-symbols-outlined mr-4">swap_horiz</span>
+            <span className="text-sm">Changes</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("stale")}
+            className="w-full text-left flex items-center px-2 py-3 rounded-l-md transition-all"
+            style={{ color: "var(--color-on-surface-variant)" }}
+          >
+            <span className="material-symbols-outlined mr-4">schedule</span>
+            <span className="text-sm">Stale Areas</span>
+          </button>
+        </nav>
+        <div className="mt-auto pt-4 space-y-3">
+          <button
+            onClick={() => router.push("/lapor")}
             className="w-full py-2 px-4 rounded-full text-sm font-bold shadow-md flex items-center justify-center transition-all active:scale-95"
-            style={{
-              backgroundColor: "var(--color-primary)",
-              color: "var(--color-on-primary)",
-            }}
+            style={{ backgroundColor: "var(--color-primary)", color: "var(--color-on-primary)" }}
           >
             <span className="material-symbols-outlined filled-icon mr-2">add</span>
             Add New Report
           </button>
+          <button
+            onClick={() => { logout(); router.push("/"); }}
+            className="w-full py-2 px-4 rounded-full text-sm font-medium border flex items-center justify-center transition-all active:scale-95"
+            style={{ borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}
+          >
+            <span className="material-symbols-outlined mr-2">logout</span>
+            Sign Out
+          </button>
           <div
-            className="mt-6 flex items-center p-2 rounded-lg shadow-sm"
+            className="flex items-center p-2 rounded-lg shadow-sm"
             style={{ backgroundColor: "var(--color-surface)" }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCTazlSUhlRaDORLoOeV99Kcumq3XE0iGvWeDl-o-KXbKkMfvDOSRh_DSRNuBVaYy4kvwWSubX4ZCnrU2RnOVd7_oq8iOQcDVIXa4QsaU7tX5R3Jd0ayC0HJzV8PFWv4Qz14nv8mkuh6Llm1HhK4wV9wzNk5zujkCxkaoanlVXjNle7EYKYSnqDSKSyieoOJRJKxNeQKpeUhgQxEf1cxqeeb9B9t8p5L0qk911G72mA1p4xFjC0FRu9A"
-              alt="Health Official"
-              className="w-10 h-10 rounded-full object-cover border mr-4"
-              style={{ borderColor: "var(--color-outline-variant)" }}
-            />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: "var(--color-primary-container)", color: "var(--color-on-primary-container)" }}>
+              <span className="material-symbols-outlined">person</span>
+            </div>
             <div>
-              <p
-                className="text-sm font-bold"
-                style={{ color: "var(--color-on-surface)" }}
-              >
-                Dr. Budi Santoso
-              </p>
-              <p
-                className="text-xs"
-                style={{ color: "var(--color-on-surface-variant)" }}
-              >
-                Admin
-              </p>
+              <p className="text-sm font-bold" style={{ color: "var(--color-on-surface)" }}>{user?.username || "Admin"}</p>
+              <p className="text-xs" style={{ color: "var(--color-on-surface-variant)" }}>Administrator</p>
             </div>
           </div>
         </div>
