@@ -1,11 +1,4 @@
 import os
-import sys
-
-MODEL_DIR_ABS = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
-)
-sys.path.insert(0, MODEL_DIR_ABS)
-
 import json
 import joblib
 import numpy as np
@@ -21,7 +14,7 @@ _meta = None
 def _load():
     global _habitat_model, _mobility_model, _meta
     model_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+        os.path.join(os.path.dirname(__file__), "..", "..", "models")
     )
     if _habitat_model is None:
         _habitat_model = joblib.load(os.path.join(model_dir, "habitat_model.pkl"))
