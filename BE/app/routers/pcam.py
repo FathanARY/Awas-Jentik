@@ -7,11 +7,14 @@ from typing import Optional
 
 from app.database import get_session
 from app.models.pcam import MobilitasGrid, RiwayatRisiko, CsvUploadLog
+from app.models.user import User
+from app.services.auth import get_current_admin
 from app.services.ml_service import predict_risk
 from app.services.smoothing import (
     ema_smooth, skor_ke_kategori, kategori_naik, batasi_lompatan,
     simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
 )
+from app.routers.notifications import trigger_notifikasi
 from app.schemas import (
     CsvPreviewRow, CsvPreviewResponse, CsvUploadResponse,
     ChangeItem, ChangesResponse, StaleAreaItem,
@@ -81,6 +84,7 @@ def validate_csv_content(content: str) -> list[CsvPreviewRow]:
 @router.post("/upload-csv/preview", response_model=CsvPreviewResponse)
 async def preview_csv(
     file: UploadFile = File(...),
+    admin: User = Depends(get_current_admin),
 ):
     if not file.filename or not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="File harus berformat .csv")
@@ -108,6 +112,7 @@ async def preview_csv(
 async def upload_csv(
     file: UploadFile = File(...),
     session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin),
 ):
     if not file.filename or not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="File harus berformat .csv")
@@ -179,6 +184,7 @@ async def upload_csv(
 
         if kategori_naik(kategori_lama, kategori_final):
             categories_changed += 1
+            trigger_notifikasi(session, row.grid_id, kategori_lama, kategori_final, f"CSV: {file.filename}")
 
         updated += 1
 
