@@ -13,6 +13,7 @@ class Laporan(SQLModel, table=True):
 
     lat: Optional[float] = None
     lng: Optional[float] = None
+    grid_id: Optional[str] = Field(default=None, index=True, max_length=32)
     alamat: Optional[str] = None
     
     grid_x: Optional[int] = None

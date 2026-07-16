@@ -1,0 +1,268 @@
+import csv
+import datetime
+import io
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
+from sqlmodel import Session, select
+from typing import Optional
+
+from app.database import get_session
+from app.models.pcam import MobilitasGrid, RiwayatRisiko, CsvUploadLog
+from app.services.ml_service import predict_risk
+from app.services.smoothing import (
+    ema_smooth, skor_ke_kategori, kategori_naik, batasi_lompatan,
+    simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
+)
+from app.schemas import (
+    CsvPreviewRow, CsvPreviewResponse, CsvUploadResponse,
+    ChangeItem, ChangesResponse, StaleAreaItem,
+)
+
+router = APIRouter(prefix="/api", tags=["pcem"])
+
+CSV_COLUMNS = [
+    "Grid_ID", "Periode_Akhir", "Pendatang_30_Hari",
+    "Pendatang_Dari_Endemis", "Pekerja_Mobil", "Riwayat_Perjalanan_Endemis",
+]
+
+
+def validate_csv_content(content: str) -> list[CsvPreviewRow]:
+    reader = csv.DictReader(io.StringIO(content))
+    if not reader.fieldnames:
+        raise HTTPException(status_code=400, detail="CSV kosong atau tidak memiliki header")
+
+    missing = [c for c in CSV_COLUMNS if c not in reader.fieldnames]
+    if missing:
+        raise HTTPException(status_code=400, detail=f"Kolom tidak lengkap: {missing}. Format: {CSV_COLUMNS}")
+
+    rows: list[CsvPreviewRow] = []
+    for i, row in enumerate(reader):
+        errors = []
+        grid_id = row.get("Grid_ID", "").strip()
+        if not grid_id:
+            errors.append("Grid_ID kosong")
+
+        try:
+            pendatang = int(row.get("Pendatang_30_Hari", "0"))
+            endemis = int(row.get("Pendatang_Dari_Endemis", "0"))
+            pekerja = int(row.get("Pekerja_Mobil", "0"))
+            riwayat = int(row.get("Riwayat_Perjalanan_Endemis", "0"))
+        except ValueError:
+            errors.append("Nilai numerik tidak valid")
+
+        negatif = []
+        if pendatang < 0: negatif.append("Pendatang_30_Hari")
+        if endemis < 0: negatif.append("Pendatang_Dari_Endemis")
+        if pekerja < 0: negatif.append("Pekerja_Mobil")
+        if riwayat < 0: negatif.append("Riwayat_Perjalanan_Endemis")
+        if negatif:
+            errors.append(f"Nilai negatif: {negatif}")
+
+        if pendatang < endemis:
+            errors.append("Pendatang_Dari_Endemis > Pendatang_30_Hari")
+
+        try:
+            datetime.date.fromisoformat(row.get("Periode_Akhir", "").strip())
+        except ValueError:
+            errors.append("Periode_Akhir bukan format YYYY-MM-DD")
+
+        rows.append(CsvPreviewRow(
+            grid_id=grid_id,
+            pendatang_30_hari=pendatang if not errors else 0,
+            pendatang_dari_endemis=endemis if not errors else 0,
+            pekerja_mobil=pekerja if not errors else 0,
+            riwayat_perjalanan_endemis=riwayat if not errors else 0,
+            valid=len(errors) == 0,
+            error="; ".join(errors) if errors else None,
+        ))
+
+    return rows
+
+
+@router.post("/upload-csv/preview", response_model=CsvPreviewResponse)
+async def preview_csv(
+    file: UploadFile = File(...),
+):
+    if not file.filename or not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="File harus berformat .csv")
+
+    content = (await file.read()).decode("utf-8")
+    rows = validate_csv_content(content)
+    valid = sum(1 for r in rows if r.valid)
+    invalid = len(rows) - valid
+
+    changes = 0
+    for r in rows:
+        if r.valid:
+            changes += 1
+
+    return CsvPreviewResponse(
+        total_rows=len(rows),
+        valid_rows=valid,
+        invalid_rows=invalid,
+        rows=rows,
+        summary=f"{valid} baris valid akan diperbarui. {changes} grid akan dianalisis ulang.",
+    )
+
+
+@router.post("/upload-csv", response_model=CsvUploadResponse)
+async def upload_csv(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+):
+    if not file.filename or not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="File harus berformat .csv")
+
+    content = (await file.read()).decode("utf-8")
+    rows = validate_csv_content(content)
+    valid_rows = [r for r in rows if r.valid]
+
+    categories_changed = 0
+    updated = 0
+
+    for row in valid_rows:
+        existing = session.exec(
+            select(MobilitasGrid).where(MobilitasGrid.grid_id == row.grid_id)
+        ).first()
+
+        if existing:
+            existing.pendatang_30_hari = row.pendatang_30_hari
+            existing.pendatang_dari_endemis = row.pendatang_dari_endemis
+            existing.pekerja_mobil = row.pekerja_mobil
+            existing.riwayat_perjalanan_endemis = row.riwayat_perjalanan_endemis
+            existing.updated_at = datetime.datetime.utcnow()
+            session.add(existing)
+        else:
+            entry = MobilitasGrid(
+                grid_id=row.grid_id,
+                periode_akhir=datetime.date.today(),
+                pendatang_30_hari=row.pendatang_30_hari,
+                pendatang_dari_endemis=row.pendatang_dari_endemis,
+                pekerja_mobil=row.pekerja_mobil,
+                riwayat_perjalanan_endemis=row.riwayat_perjalanan_endemis,
+            )
+            session.add(entry)
+
+        mobility_input = {
+            "Pendatang_30_Hari": row.pendatang_30_hari,
+            "Pendatang_Dari_Endemis": row.pendatang_dari_endemis,
+            "Pekerja_Mobil": row.pekerja_mobil,
+            "Riwayat_Perjalanan_Endemis": row.riwayat_perjalanan_endemis,
+        }
+        habitat_default = {
+            "Persentase_Lumut": 50, "Persentase_Vegetasi": 50,
+            "Air_Tenang": "Tidak", "Paparan_Matahari": "Sedang",
+            "Luas_Genangan_m2": 20, "Curah_Hujan_30_Hari_mm": 300,
+            "Jarak_Hutan_m": 200, "Jarak_Sawah_m": 500, "Jarak_Sungai_m": 500,
+            "Jarak_Rawa_m": 1000, "Jarak_Tambang_m": 3000,
+            "Jarak_Permukiman_m": 200, "Jarak_Puskesmas_m": 2000,
+        }
+        risk = predict_risk(habitat_default, mobility_input, kasus_radius_1km=0)
+
+        riwayat_terakhir = session.exec(
+            select(RiwayatRisiko)
+            .where(RiwayatRisiko.grid_id == row.grid_id)
+            .order_by(RiwayatRisiko.timestamp.desc())
+        ).first()
+
+        skor_lama = riwayat_terakhir.skor if riwayat_terakhir else None
+        kategori_lama = riwayat_terakhir.kategori if riwayat_terakhir else None
+
+        n = hitung_n_laporan(session, row.grid_id)
+        skor_smoothed = ema_smooth(risk["risiko_gabungan"], skor_lama, n)
+        kategori_raw = skor_ke_kategori(skor_smoothed)
+        cluster = cek_cluster_darurat(session, row.grid_id)
+        kategori_final = batasi_lompatan(kategori_lama, kategori_raw, cluster)
+
+        simpan_riwayat(session, row.grid_id, skor_smoothed, kategori_final,
+                       sumber=f"CSV: {file.filename}",
+                       detail=f"n_laporan={n}, alpha={hitung_n_laporan.__globals__['hitung_alpha'](n) if False else max(0.1, 1.0/(n+1)):.3f}")
+
+        if kategori_naik(kategori_lama, kategori_final):
+            categories_changed += 1
+
+        updated += 1
+
+    log = CsvUploadLog(
+        filename=file.filename or "unknown.csv",
+        total_rows=len(rows),
+        rows_updated=updated,
+        rows_valid=len(valid_rows),
+        rows_invalid=len(rows) - len(valid_rows),
+        status="committed",
+    )
+    session.add(log)
+    session.commit()
+
+    return CsvUploadResponse(
+        status="committed",
+        total_rows=len(rows),
+        rows_updated=updated,
+        categories_changed=categories_changed,
+    )
+
+
+@router.get("/changes", response_model=ChangesResponse)
+async def get_changes(
+    limit: int = Query(default=20, le=100),
+    session: Session = Depends(get_session),
+):
+    all_grids = session.exec(
+        select(RiwayatRisiko.grid_id).distinct()
+    ).all()
+
+    changes: list[ChangeItem] = []
+    for grid_id in all_grids:
+        riwayat = session.exec(
+            select(RiwayatRisiko)
+            .where(RiwayatRisiko.grid_id == grid_id)
+            .order_by(RiwayatRisiko.timestamp.desc())
+            .limit(2)
+        ).all()
+
+        if len(riwayat) >= 2:
+            baru, lama = riwayat[0], riwayat[1]
+            if baru.kategori != lama.kategori:
+                changes.append(ChangeItem(
+                    grid_id=grid_id,
+                    timestamp=baru.timestamp,
+                    skor_lama=lama.skor,
+                    skor_baru=baru.skor,
+                    kategori_lama=lama.kategori,
+                    kategori_baru=baru.kategori,
+                    sumber_perubahan=baru.sumber_perubahan,
+                ))
+
+    changes.sort(key=lambda c: c.timestamp, reverse=True)
+    return ChangesResponse(changes=changes[:limit], total=len(changes))
+
+
+@router.get("/areas/stale", response_model=list[StaleAreaItem])
+async def get_stale_areas(
+    days: int = Query(default=60),
+    session: Session = Depends(get_session),
+):
+    all_grids = session.exec(
+        select(RiwayatRisiko.grid_id).distinct()
+    ).all()
+
+    cutoff = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+    stale: list[StaleAreaItem] = []
+
+    for grid_id in all_grids:
+        terakhir = session.exec(
+            select(RiwayatRisiko)
+            .where(RiwayatRisiko.grid_id == grid_id)
+            .order_by(RiwayatRisiko.timestamp.desc())
+        ).first()
+
+        if terakhir and terakhir.timestamp < cutoff:
+            days_ago = (datetime.datetime.utcnow() - terakhir.timestamp).days
+            stale.append(StaleAreaItem(
+                grid_id=grid_id,
+                last_updated=terakhir.timestamp,
+                days_stale=days_ago,
+                current_skor=terakhir.skor,
+                current_kategori=terakhir.kategori,
+            ))
+
+    return stale

@@ -114,3 +114,51 @@ class StatsResponse(BaseModel):
     laporan_menunggu: int
     laporan_ditindaklanjuti: int
     rata_rata_risiko: float
+
+
+class CsvPreviewRow(BaseModel):
+    grid_id: str
+    pendatang_30_hari: int
+    pendatang_dari_endemis: int
+    pekerja_mobil: int
+    riwayat_perjalanan_endemis: int
+    valid: bool = True
+    error: Optional[str] = None
+
+
+class CsvPreviewResponse(BaseModel):
+    total_rows: int
+    valid_rows: int
+    invalid_rows: int
+    rows: list[CsvPreviewRow]
+    summary: str
+
+
+class CsvUploadResponse(BaseModel):
+    status: str
+    total_rows: int
+    rows_updated: int
+    categories_changed: int
+
+
+class ChangeItem(BaseModel):
+    grid_id: str
+    timestamp: datetime
+    skor_lama: float
+    skor_baru: float
+    kategori_lama: str
+    kategori_baru: str
+    sumber_perubahan: str
+
+
+class ChangesResponse(BaseModel):
+    changes: list[ChangeItem]
+    total: int
+
+
+class StaleAreaItem(BaseModel):
+    grid_id: str
+    last_updated: Optional[datetime]
+    days_stale: int
+    current_skor: Optional[float]
+    current_kategori: Optional[str]

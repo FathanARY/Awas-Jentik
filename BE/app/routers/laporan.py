@@ -1,13 +1,19 @@
 import os
 import uuid
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
-from sqlmodel import Session
+from sqlmodel import Session, select
 from typing import Optional
+from pydantic import BaseModel
 
 from app.database import get_session
 from app.models.laporan import Laporan
+from app.models.pcam import RiwayatRisiko
 from app.schemas import LaporRequest, LaporanResponse, LaporanDetailResponse, TindakanRequest
 from app.services import predict_risk, reverse_geocode
+from app.services.smoothing import (
+    ema_smooth, skor_ke_kategori, batasi_lompatan,
+    simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
+)
 from app.config import UPLOAD_DIR
 
 router = APIRouter(prefix="/api", tags=["laporan"])
@@ -41,9 +47,6 @@ async def submit_laporan(
     kasus_malaria_1km_30hari: int = Form(default=0),
     lat: Optional[float] = Form(None),
     lng: Optional[float] = Form(None),
-    grid_x: Optional[int] = Form(None),
-    grid_y: Optional[int] = Form(None),
-    grid_land: Optional[str] = Form(None),
     foto: Optional[UploadFile] = File(None),
     session: Session = Depends(get_session),
 ):
@@ -86,14 +89,18 @@ async def submit_laporan(
     if lat is not None and lng is not None:
         alamat = await reverse_geocode(lat, lng)
 
+    grid_id = None
+    if lat is not None and lng is not None:
+        gx = int(abs(lat) * 100) % 100
+        gy = int(abs(lng) * 100) % 100
+        grid_id = f"AREA-{gx:02d}{gy:02d}"
+
     laporan = Laporan(
         kode_laporan=generate_kode(),
         status="menunggu",
         lat=lat,
         lng=lng,
-        grid_x=grid_x,
-        grid_y=grid_y,
-        grid_land=grid_land,
+        grid_id=grid_id,
         alamat=alamat,
         foto_path=foto_path,
         persentase_lumut=persentase_lumut,
@@ -135,20 +142,15 @@ async def list_laporan(
     offset: int = 0,
     session: Session = Depends(get_session),
 ):
-    from sqlmodel import select
-
     stmt = select(Laporan)
     if status:
         stmt = stmt.where(Laporan.status == status)
     stmt = stmt.order_by(Laporan.created_at.desc()).offset(offset).limit(limit)
-    results = session.exec(stmt).all()
-    return results
+    return session.exec(stmt).all()
 
 
 @router.get("/laporan/{kode_laporan}", response_model=LaporanDetailResponse)
 async def get_laporan_detail(kode_laporan: str, session: Session = Depends(get_session)):
-    from sqlmodel import select
-
     stmt = select(Laporan).where(Laporan.kode_laporan == kode_laporan)
     laporan = session.exec(stmt).first()
     if not laporan:
@@ -162,7 +164,6 @@ async def update_tindakan(
     body: TindakanRequest,
     session: Session = Depends(get_session),
 ):
-    from sqlmodel import select
     import datetime
 
     stmt = select(Laporan).where(Laporan.kode_laporan == kode_laporan)
@@ -174,6 +175,57 @@ async def update_tindakan(
     laporan.diverifikasi_oleh = body.diverifikasi_oleh
     laporan.status = "ditindaklanjuti"
     laporan.ditindaklanjuti_pada = datetime.datetime.utcnow()
+    session.add(laporan)
+    session.commit()
+    session.refresh(laporan)
+    return laporan
+
+
+class VerifyRequest(BaseModel):
+    diverifikasi_oleh: Optional[str] = None
+
+
+@router.post("/laporan/{kode_laporan}/verify", response_model=LaporanResponse)
+async def verify_laporan(
+    kode_laporan: str,
+    body: VerifyRequest,
+    session: Session = Depends(get_session),
+):
+    stmt = select(Laporan).where(Laporan.kode_laporan == kode_laporan)
+    laporan = session.exec(stmt).first()
+    if not laporan:
+        raise HTTPException(status_code=404, detail="Laporan tidak ditemukan")
+
+    if laporan.grid_id is None and laporan.lat and laporan.lng:
+        gx = int(abs(laporan.lat) * 100) % 100
+        gy = int(abs(laporan.lng) * 100) % 100
+        laporan.grid_id = f"AREA-{gx:02d}{gy:02d}"
+
+    grid_id = laporan.grid_id or laporan.kode_laporan
+
+    riwayat_terakhir = session.exec(
+        select(RiwayatRisiko)
+        .where(RiwayatRisiko.grid_id == grid_id)
+        .order_by(RiwayatRisiko.timestamp.desc())
+    ).first()
+
+    skor_lama = riwayat_terakhir.skor if riwayat_terakhir else None
+    kategori_lama = riwayat_terakhir.kategori if riwayat_terakhir else None
+
+    n = hitung_n_laporan(session, grid_id)
+    skor_smoothed = ema_smooth(laporan.risiko_gabungan or 50, skor_lama, n)
+    kategori_raw = skor_ke_kategori(skor_smoothed)
+    cluster = cek_cluster_darurat(session, grid_id)
+    kategori_final = batasi_lompatan(kategori_lama, kategori_raw, cluster)
+
+    simpan_riwayat(
+        session, grid_id, skor_smoothed, kategori_final,
+        sumber=f"Verifikasi: {kode_laporan}",
+        detail=f"diverifikasi oleh {body.diverifikasi_oleh or 'kader'}, n={n}",
+    )
+
+    laporan.status = "terverifikasi"
+    laporan.diverifikasi_oleh = body.diverifikasi_oleh
     session.add(laporan)
     session.commit()
     session.refresh(laporan)

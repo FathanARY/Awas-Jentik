@@ -23,6 +23,24 @@ interface StatsItem {
   rata_rata_risiko: number;
 }
 
+interface ChangeItem {
+  grid_id: string;
+  timestamp: string;
+  skor_lama: number;
+  skor_baru: number;
+  kategori_lama: string;
+  kategori_baru: string;
+  sumber_perubahan: string;
+}
+
+interface StaleAreaItem {
+  grid_id: string;
+  last_updated: string | null;
+  days_stale: number;
+  current_skor: number | null;
+  current_kategori: string | null;
+}
+
 function getAreaStyle(score: number) {
   if (score >= 80) return { borderColor: "var(--color-error)", chipBg: "var(--color-error-container)", chipFg: "var(--color-on-error-container)", scoreFg: "var(--color-error)", icon: "trending_up" };
   if (score >= 60) return { borderColor: "#f59e0b", chipBg: "#fef3c7", chipFg: "#92400e", scoreFg: "#b45309", icon: "warning" };
@@ -34,6 +52,9 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const [areas, setAreas] = useState<AreaItem[]>([]);
   const [stats, setStats] = useState<StatsItem | null>(null);
+  const [changes, setChanges] = useState<ChangeItem[]>([]);
+  const [staleAreas, setStaleAreas] = useState<StaleAreaItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"priority" | "changes" | "stale">("priority");
 
   useEffect(() => {
     if (!loading && (!user || user.role !== "admin")) {
@@ -44,6 +65,8 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     apiFetch<AreaItem[]>("/areas").then(setAreas).catch(() => {});
     apiFetch<StatsItem>("/stats").then(setStats).catch(() => {});
+    apiFetch<{ changes: ChangeItem[] }>("/changes").then(r => setChanges(r.changes)).catch(() => {});
+    apiFetch<StaleAreaItem[]>("/areas/stale").then(setStaleAreas).catch(() => {});
   }, []);
 
   if (loading || !user || user.role !== "admin") {
@@ -318,21 +341,34 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Priority List */}
+          {/* Tabbed Panel */}
           <div className="w-full lg:w-96 flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <h3
-                className="text-xl font-bold"
-                style={{ color: "var(--color-on-surface)" }}
-              >
-                Regional Priority
-              </h3>
-              <button style={{ color: "var(--color-primary)" }}>
-                <span className="material-symbols-outlined">filter_list</span>
-              </button>
+            <div className="flex gap-1 p-1 rounded-full bg-slate-100" style={{ backgroundColor: "var(--color-surface-container)" }}>
+              {[
+                { key: "priority" as const, label: "Priority", icon: "trending_up" },
+                { key: "changes" as const, label: `Changes${changes.length ? ` (${changes.length})` : ""}`, icon: "swap_horiz" },
+                { key: "stale" as const, label: `Stale${staleAreas.length ? ` (${staleAreas.length})` : ""}`, icon: "schedule" },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-full text-xs font-bold transition-all"
+                  style={activeTab === tab.key ? {
+                    backgroundColor: "var(--color-primary)",
+                    color: "var(--color-on-primary)",
+                    boxShadow: "0 2px 8px rgba(0,40,142,0.3)",
+                  } : {
+                    color: "var(--color-on-surface-variant)",
+                  }}
+                >
+                  <span className="material-symbols-outlined text-sm">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
             </div>
+
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              {areas.map((area) => {
+              {activeTab === "priority" && areas.map((area) => {
                 const style = getAreaStyle(area.score);
                 return (
                 <Link
@@ -369,6 +405,60 @@ export default function AdminDashboardPage() {
                   </div>
                 </Link>
               )})}
+
+              {activeTab === "changes" && (changes.length === 0 ? (
+                <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>
+                  <span className="material-symbols-outlined text-3xl mb-2">check_circle</span>
+                  <p className="text-sm font-medium">No recent category changes detected.</p>
+                </div>
+              ) : changes.map((c, i) => (
+                <div key={i} className="block p-4 rounded-xl shadow-sm border border-l-4 hover:shadow-md transition-shadow" style={{
+                  backgroundColor: "var(--color-surface)",
+                  borderLeftColor: "var(--color-error)",
+                  borderTopColor: "var(--color-outline-variant)",
+                  borderRightColor: "var(--color-outline-variant)",
+                  borderBottomColor: "var(--color-outline-variant)",
+                }}>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-bold" style={{ color: "var(--color-on-surface)" }}>{c.grid_id}</span>
+                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ backgroundColor: "var(--color-error-container)", color: "var(--color-on-error-container)" }}>
+                      {c.kategori_lama} → {c.kategori_baru}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs" style={{ color: "var(--color-on-surface-variant)" }}>
+                    <span>Score: {c.skor_lama.toFixed(0)} → {c.skor_baru.toFixed(0)}</span>
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: "var(--color-on-surface-variant)" }}>{c.sumber_perubahan}</p>
+                  <p className="text-xs" style={{ color: "var(--color-outline)" }}>{new Date(c.timestamp).toLocaleString("id-ID")}</p>
+                </div>
+              )))}
+
+              {activeTab === "stale" && (staleAreas.length === 0 ? (
+                <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>
+                  <span className="material-symbols-outlined text-3xl mb-2">update</span>
+                  <p className="text-sm font-medium">All areas have been updated recently.</p>
+                </div>
+              ) : staleAreas.map((a, i) => (
+                <div key={i} className="block p-4 rounded-xl shadow-sm border border-dashed hover:shadow-md transition-shadow" style={{
+                  backgroundColor: "var(--color-surface)",
+                  borderColor: "#f59e0b",
+                  backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(245,158,11,0.05) 5px, rgba(245,158,11,0.05) 10px)",
+                }}>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-bold" style={{ color: "var(--color-on-surface)" }}>{a.grid_id}</span>
+                    <span className="px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1" style={{ backgroundColor: "#fef3c7", color: "#92400e" }}>
+                      <span className="material-symbols-outlined text-sm">warning</span>
+                      {a.days_stale}d stale
+                    </span>
+                  </div>
+                  <p className="text-xs" style={{ color: "var(--color-on-surface-variant)" }}>
+                    Last updated: {a.last_updated ? new Date(a.last_updated).toLocaleDateString("id-ID") : "Never"}
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "var(--color-outline)" }}>
+                    Current: Score {a.current_skor?.toFixed(0) ?? "—"} · {a.current_kategori ?? "Unknown"}
+                  </p>
+                </div>
+              )))}
             </div>
           </div>
         </div>
