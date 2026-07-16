@@ -1,6 +1,10 @@
+"use client";
+
 import Header from "@/components/Header";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../../../api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -11,13 +15,11 @@ interface LaporanDetail {
   lat: number | null;
   lng: number | null;
   alamat: string | null;
-  foto_path: string | null;
   persentase_lumut: number | null;
   persentase_vegetasi: number | null;
   air_tenang: string | null;
   paparan_matahari: string | null;
   luas_genangan_m2: number | null;
-  curah_hujan_30_hari_mm: number | null;
   jarak_permukiman_m: number | null;
   habitat_risk_score: number | null;
   habitat_category: string | null;
@@ -35,26 +37,73 @@ function getRiskStyle(score: number | null) {
   return { bg: "#d1fae5", fg: "#065f46", level: "Low" };
 }
 
-async function fetchReport(id: string): Promise<LaporanDetail | null> {
-  try {
-    const res = await fetch(`${API_BASE}/laporan/${id}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-  } catch {
-    return null;
+export default function AdminLaporanDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const [data, setData] = useState<LaporanDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiFetch<LaporanDetail>(`/laporan/${id}`)
+      .then(setData)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  async function handleVerify() {
+    setActionLoading("verify");
+    setActionMsg(null);
+    try {
+      const res = await fetch(`${API_BASE}/laporan/${id}/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        body: JSON.stringify({ diverifikasi_oleh: "Admin" }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setData(updated);
+        setActionMsg("Report verified successfully!");
+      }
+    } catch { setActionMsg("Verification failed."); }
+    setActionLoading(null);
   }
-}
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  return { title: `Report Detail #${id} — MalariaWatch Admin` };
-}
+  async function handleTindakan(tindakan: string) {
+    setActionLoading("tindakan");
+    setActionMsg(null);
+    try {
+      const res = await fetch(`${API_BASE}/laporan/${id}/tindakan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        body: JSON.stringify({ tindakan, diverifikasi_oleh: "Admin" }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setData(updated);
+        setActionMsg(`Action "${tindakan}" recorded.`);
+      }
+    } catch { setActionMsg("Action failed."); }
+    setActionLoading(null);
+  }
 
-export default async function AdminLaporanDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const data = await fetchReport(id);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--color-background)" }}>
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
-  if (!data) notFound();
+  if (!data) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ backgroundColor: "var(--color-background)" }}>
+        <p className="text-lg font-medium" style={{ color: "var(--color-on-surface)" }}>Report not found</p>
+        <Link href="/admin" className="px-6 py-2.5 rounded-lg text-sm font-medium" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-on-primary)" }}>Back to Dashboard</Link>
+      </div>
+    );
+  }
 
   const risk = getRiskStyle(data.risiko_gabungan);
   const skor = data.risiko_gabungan ?? 0;
@@ -81,15 +130,22 @@ export default async function AdminLaporanDetailPage({ params }: { params: Promi
         }
         rightContent={
           <div className="hidden md:flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${data.status === "ditindaklanjuti" ? "bg-green-100 text-green-700 border border-green-200" : "bg-amber-100 text-amber-700 border border-amber-200"}`}>
-              <span className="material-symbols-outlined text-sm">{data.status === "ditindaklanjuti" ? "check_circle" : "sync"}</span>
-              {data.status === "ditindaklanjuti" ? "Resolved" : "Pending Action"}
+            <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${data.status === "ditindaklanjuti" ? "bg-green-100 text-green-700" : data.status === "terverifikasi" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
+              <span className="material-symbols-outlined text-sm">{data.status === "ditindaklanjuti" ? "check_circle" : data.status === "terverifikasi" ? "verified" : "sync"}</span>
+              {data.status}
             </span>
           </div>
         }
       />
 
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 md:px-12 py-6 md:py-8">
+        {actionMsg && (
+          <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2" style={actionMsg.includes("failed") ? { backgroundColor: "var(--color-error-container)", color: "var(--color-on-error-container)" } : { backgroundColor: "#d1fae5", color: "#065f46" }}>
+            <span className="material-symbols-outlined text-lg">{actionMsg.includes("failed") ? "error" : "check_circle"}</span>
+            {actionMsg}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           <div className="lg:col-span-7 flex flex-col gap-6">
             <section className="rounded-xl border shadow-sm overflow-hidden flex flex-col" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-outline-variant)" }}>
@@ -106,7 +162,6 @@ export default async function AdminLaporanDetailPage({ params }: { params: Promi
                         <span className="material-symbols-outlined text-4xl" style={{ color: "var(--color-primary)" }}>location_on</span>
                       </div>
                       <div className="absolute bottom-2 right-2 px-2 py-1 rounded text-xs backdrop-blur-sm flex items-center gap-1" style={{ backgroundColor: "rgba(33,49,69,0.8)", color: "var(--color-inverse-on-surface)" }}>
-                        <span className="material-symbols-outlined text-sm">location_on</span>
                         {data.lat.toFixed(6)}, {data.lng.toFixed(6)}
                       </div>
                     </div>
@@ -146,10 +201,7 @@ export default async function AdminLaporanDetailPage({ params }: { params: Promi
                     <tr key={row.item} className="border-b" style={{ borderColor: i < 2 ? "rgba(196,197,213,0.3)" : "transparent" }}>
                       <td className="py-3 px-4 text-base" style={{ color: "var(--color-on-surface)" }}>{row.item}</td>
                       <td className="py-3 px-4 text-right">
-                        <span className="inline-flex items-center gap-1 text-sm font-bold" style={{ color: row.color }}>
-                          <span className="material-symbols-outlined text-sm">{row.icon}</span>
-                          {row.result}
-                        </span>
+                        <span className="inline-flex items-center gap-1 text-sm font-bold" style={{ color: row.color }}>{row.icon} {row.result}</span>
                       </td>
                     </tr>
                   ))}
@@ -175,9 +227,21 @@ export default async function AdminLaporanDetailPage({ params }: { params: Promi
         </div>
 
         <div className="mt-8 pt-6 border-t flex flex-col sm:flex-row items-center justify-end gap-4" style={{ borderColor: "var(--color-outline-variant)" }}>
+          {data.status !== "terverifikasi" && data.status !== "ditindaklanjuti" && (
+            <button onClick={handleVerify} disabled={actionLoading === "verify"} className="w-full sm:w-auto px-6 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 shadow-sm transition-colors disabled:opacity-50" style={{ backgroundColor: "var(--color-secondary)", color: "var(--color-on-secondary)" }}>
+              <span className="material-symbols-outlined text-lg">verified</span>
+              {actionLoading === "verify" ? "Verifying..." : "Verify Report"}
+            </button>
+          )}
+          {data.status !== "ditindaklanjuti" && (
+            <button onClick={() => handleTindakan("Fogging terjadwal")} disabled={actionLoading === "tindakan"} className="w-full sm:w-auto px-6 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 shadow-sm transition-colors disabled:opacity-50" style={{ backgroundColor: "var(--color-primary)", color: "var(--color-on-primary)" }}>
+              <span className="material-symbols-outlined text-lg">done_all</span>
+              {actionLoading === "tindakan" ? "Processing..." : "Mark as Resolved"}
+            </button>
+          )}
           <Link href={`/admin`} className="w-full sm:w-auto px-6 py-2.5 rounded-lg border text-sm font-medium flex items-center justify-center gap-2 transition-colors" style={{ borderColor: "var(--color-primary)", color: "var(--color-primary)" }}>
             <span className="material-symbols-outlined text-lg">arrow_back</span>
-            Back to Dashboard
+            Back
           </Link>
         </div>
       </main>
