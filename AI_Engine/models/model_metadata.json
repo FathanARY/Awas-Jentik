@@ -1,0 +1,80 @@
+{
+  "model_version": "hrs-xgboost-v1",
+  "model_type": "xgboost",
+  "winner": "xgboost_regressor",
+  "feature_order": [
+    "luas_genangan_m2",
+    "curah_hujan_bulanan_mm",
+    "jarak_sungai_m",
+    "jarak_rawa_m",
+    "jarak_sawah_m",
+    "jarak_hutan_m",
+    "jarak_tambang_m",
+    "lumut_level",
+    "vegetasi_level",
+    "paparan_matahari",
+    "air_tenang"
+  ],
+  "dataset_fingerprint": "998cef59fba3b5236618344077d9d7f9e9aa8f6c60375e115a5ddf0952222ed1",
+  "mapping_version": "mapping-v1-20260717",
+  "runtime": {
+    "requested_device": "cuda",
+    "active_device": "cuda",
+    "fallback_used": false,
+    "tabpfn_version": "8.1.0",
+    "torch_version": "2.7.0+cu128",
+    "cuda_version": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "gpu_memory_bytes": 4294443008,
+    "python_version": "3.12.13"
+  },
+  "holdout_metrics": {
+    "mae": 0.869448,
+    "rmse": 1.177633,
+    "r2": 0.996479,
+    "predict_seconds": 0.002015,
+    "fit_seconds": 0.0
+  },
+  "checkpoint_inventory": [
+    {
+      "path": ".cache\\huggingface\\.gitignore",
+      "bytes": 1,
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1"
+    },
+    {
+      "path": ".cache\\huggingface\\CACHEDIR.TAG",
+      "bytes": 195,
+      "sha256": "e8893e2dcb3f4545ef67a0a5b7b769113d38eef1aa61c7c7ba14659b02af955f"
+    },
+    {
+      "path": ".cache\\huggingface\\download\\config.json.metadata",
+      "bytes": 104,
+      "sha256": "4c3d36a2249a0995c53daa5d8b4d547984e804f6eab7c0217b3461a71769ae2e"
+    },
+    {
+      "path": ".cache\\huggingface\\download\\tabpfn-v2-regressor.ckpt.metadata",
+      "bytes": 128,
+      "sha256": "cfff6c8e54c5583e3934924b2d72ae78fddd0a5410d567cd45abe89647352045"
+    },
+    {
+      "path": "checkpoint_manifest.json",
+      "bytes": 1379,
+      "sha256": "273ff20f53f24ae4d3aa1dc9e6751e72c03286e50c47f011755680103e425e4c"
+    },
+    {
+      "path": "tabpfn-v2-regressor.ckpt",
+      "bytes": 44390977,
+      "sha256": "2ab5a07d5c41dfe6db9aa7ae106fc6de898326c2765be66505a07e2868c10736"
+    }
+  ],
+  "xgb_best_params": {
+    "subsample": 0.9,
+    "reg_lambda": 1.0,
+    "n_estimators": 500,
+    "min_child_weight": 3,
+    "max_depth": 3,
+    "learning_rate": 0.05,
+    "colsample_bytree": 1.0
+  },
+  "fitted_filename": "hrs_winner_model.joblib"
+}

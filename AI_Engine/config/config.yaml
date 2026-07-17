@@ -1,0 +1,229 @@
+project:
+  name: garuda70
+  environment: dev
+  design_version: "2.0-multi-model"
+
+dataset:
+  source_workbook: dataset_dummy_malaria_desa_harapan_jaya.xlsx
+  mapping_version: "mapping-v1-20260717"
+  category_mapping:
+    lumut_level:
+      source_column: Persentase_Lumut
+      rules:
+        - min_inclusive: 0
+          max_inclusive: 0
+          label: Tidak Ada
+        - min_inclusive: 1
+          max_inclusive: 33
+          label: Sedikit
+        - min_inclusive: 34
+          max_inclusive: 66
+          label: Sedang
+        - min_inclusive: 67
+          max_inclusive: 100
+          label: Banyak
+    vegetasi_level:
+      source_column: Persentase_Vegetasi
+      rules:
+        - min_inclusive: 0
+          max_inclusive: 33
+          label: Jarang
+        - min_inclusive: 34
+          max_inclusive: 66
+          label: Sedang
+        - min_inclusive: 67
+          max_inclusive: 100
+          label: Lebat
+    paparan_matahari:
+      source_column: Paparan_Matahari
+      mapping_type: direct_categorical
+      allowed_values: [Tinggi, Sedang, Rendah]
+
+schema:
+  target_column: habitat_risk_score
+  group_column: spatial_zone_id
+  numeric_features:
+    - luas_genangan_m2
+    - curah_hujan_bulanan_mm
+    - jarak_sungai_m
+    - jarak_rawa_m
+    - jarak_sawah_m
+    - jarak_hutan_m
+    - jarak_tambang_m
+  ordinal_features:
+    - lumut_level
+    - vegetasi_level
+    - paparan_matahari
+  boolean_features:
+    - air_tenang
+  ordinal_categories:
+    lumut_level: [Tidak Ada, Sedikit, Sedang, Banyak]
+    vegetasi_level: [Jarang, Sedang, Lebat]
+    paparan_matahari: [Tinggi, Sedang, Rendah]
+
+scoring:
+  habitat:
+    base_points:
+      lumut_level:
+        Tidak Ada: 0
+        Sedikit: 4
+        Sedang: 8
+        Banyak: 12
+      vegetasi_level:
+        Jarang: 1
+        Sedang: 5
+        Lebat: 10
+      air_tenang:
+        false: 0
+        true: 20
+      paparan_matahari:
+        Tinggi: 1
+        Sedang: 5
+        Rendah: 8
+    luas_genangan_bands:
+      - max_exclusive: 2
+        points: 1
+      - max_exclusive: 10
+        points: 4
+      - max_exclusive: 30
+        points: 7
+      - points: 10
+    curah_hujan_bands:
+      - max_exclusive: 50
+        points: 1
+      - max_exclusive: 150
+        points: 4
+      - max_exclusive: 300
+        points: 10
+      - max_exclusive: 450
+        points: 8
+      - points: 5
+    distance_points:
+      jarak_sungai_m:
+        - max_inclusive: 100
+          points: 6
+        - max_inclusive: 300
+          points: 4
+        - max_inclusive: 600
+          points: 2
+        - points: 0
+      jarak_rawa_m:
+        - max_inclusive: 100
+          points: 7
+        - max_inclusive: 300
+          points: 4
+        - max_inclusive: 600
+          points: 2
+        - points: 0
+      jarak_sawah_m:
+        - max_inclusive: 100
+          points: 5
+        - max_inclusive: 300
+          points: 3
+        - max_inclusive: 600
+          points: 1
+        - points: 0
+      jarak_hutan_m:
+        - max_inclusive: 100
+          points: 5
+        - max_inclusive: 300
+          points: 3
+        - max_inclusive: 600
+          points: 1
+        - points: 0
+      jarak_tambang_m:
+        - max_inclusive: 100
+          points: 7
+        - max_inclusive: 300
+          points: 5
+        - max_inclusive: 600
+          points: 2
+        - points: 0
+    rules:
+      r1_bonus: 7
+      r2_bonus: 5
+      r3_bonus: 4
+      r4_air_tenang_false_cap: 58
+      r5_penalty: 5
+      r6_bonus: 6
+  mobility_scores:
+    Sangat Rendah: 10
+    Rendah: 30
+    Sedang: 55
+    Tinggi: 80
+    Sangat Tinggi: 100
+  case_distance_anchors:
+    - distance_m: 0
+      contribution: 100
+    - distance_m: 100
+      contribution: 100
+    - distance_m: 200
+      contribution: 80
+    - distance_m: 500
+      contribution: 40
+    - distance_m: 900
+      contribution: 10
+    - distance_m: 1000
+      contribution: 0
+  combined_weights:
+    habitat: 0.65
+    mobility: 0.20
+    case: 0.15
+  heatmap:
+    - max_exclusive: 20
+      level: Sangat Rendah
+      color: hijau
+    - max_exclusive: 40
+      level: Rendah
+      color: hijau_muda
+    - max_exclusive: 60
+      level: Sedang
+      color: kuning
+    - max_exclusive: 80
+      level: Tinggi
+      color: oranye
+    - max_inclusive: 100
+      level: Sangat Tinggi
+      color: merah
+
+training:
+  candidate_models: [xgboost_regressor, tabpfn_regressor]
+  baseline_model: random_forest_regressor
+  test_size: 0.20
+  cv_folds: 5
+  random_seed: 20260716
+  xgboost_random_search_iterations: 20
+  max_allowed_mae_delta_vs_baseline: 0.0
+  tie_break_winner: tabpfn_regressor
+  quality_gate:
+    max_cv_mae: 10.0
+    min_cv_r2: 0.70
+    max_predict_latency_ms: 1000
+
+tabpfn:
+  model_version: V2
+  model_license: Prior Labs License (Apache-2.0 with attribution requirement)
+  device: cuda
+  fallback_device: cpu
+  max_train_samples: 10000
+  max_features: 500
+  n_estimators: 4
+  fit_mode: low_memory
+  keep_cache_on_device: false
+  max_predict_batch_size: 128
+  use_finetuning: false
+  shap_background_size: 100
+  cache_directory: models/tabpfn_foundation
+
+providers:
+  rainfall:
+    simulation_mode: true
+    simulation_value_mm: 250
+  cases:
+    simulation_mode: true
+    case_distances_m: []
+
+api:
+  config_version: config-v1
+  audit_database: data/garuda70_audit.sqlite3
+  explanation_max_evals: 25
