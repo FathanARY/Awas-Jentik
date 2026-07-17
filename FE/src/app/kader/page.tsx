@@ -133,28 +133,7 @@ export default function KaderDashboardPage() {
 
   return (
     <div className="flex min-h-dvh" style={{ backgroundColor: "var(--color-background)" }}>
-      <Header
-        leftContent={
-          <div className="font-extrabold tracking-tight text-lg text-slate-900 flex items-center gap-2.5">
-            Kader Dashboard
-          </div>
-        }
-        rightContent={
-          <div className="flex items-center gap-3">
-            {user.role === "admin" && (
-              <Link href="/admin" className="px-3 py-1.5 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:text-blue-600 transition-colors">
-                Admin Panel
-              </Link>
-            )}
-            <button onClick={signOut} className="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-rose-600 hover:bg-rose-100 transition-colors">
-              Logout
-            </button>
-            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-              {user.username?.[0]?.toUpperCase() || "K"}
-            </div>
-          </div>
-        }
-      />
+      <Header />
 
       <main className="p-4 pt-32 md:p-12 md:pt-36 min-h-screen w-full max-w-[1600px] mx-auto">
         {/* Tab Bar */}

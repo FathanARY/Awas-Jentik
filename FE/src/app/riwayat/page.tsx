@@ -58,16 +58,7 @@ export default function RiwayatPage() {
 
   return (
     <div className="flex min-h-dvh" style={{ backgroundColor: "var(--color-background)" }}>
-      <Header
-        leftContent={
-          <Link href="/" className="font-extrabold tracking-tight text-lg text-slate-900 flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-base">water_drop</span>
-            </span>
-            MalariaWatch
-          </Link>
-        }
-      />
+      <Header />
       <main className="p-4 pt-32 md:p-12 md:pt-36 min-h-screen w-full max-w-2xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1" style={{ color: "var(--color-on-surface)" }}>Riwayat Laporan</h1>

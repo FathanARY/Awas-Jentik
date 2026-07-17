@@ -21,7 +21,12 @@ export async function apiFetch<T = unknown>(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `API error ${res.status}`);
+    // FastAPI 422 returns detail as an array of {loc, msg, type} objects
+    const detail = err.detail;
+    if (Array.isArray(detail)) {
+      throw new Error(detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join("; "));
+    }
+    throw new Error(typeof detail === "string" ? detail : `API error ${res.status}`);
   }
   return res.json();
 }
@@ -38,7 +43,12 @@ export async function apiPostForm<T = unknown>(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `API error ${res.status}`);
+    // FastAPI 422 returns detail as an array of {loc, msg, type} objects
+    const detail = err.detail;
+    if (Array.isArray(detail)) {
+      throw new Error(detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join("; "));
+    }
+    throw new Error(typeof detail === "string" ? detail : `API error ${res.status}`);
   }
   return res.json();
 }

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/app/api";
+import logo from "./assets/Gemini_Generated_Image_jnx5rpjnx5rpjnx5__2_-removebg-preview.png";
 
 interface HeaderProps {
   leftContent?: React.ReactNode;
@@ -32,11 +34,17 @@ export default function Header({ leftContent, rightContent }: HeaderProps) {
     <div className="fixed top-0 left-0 right-0 z-[100] p-4 md:p-6 pointer-events-none">
       <header className="pointer-events-auto max-w-5xl mx-auto bg-surface/70 backdrop-blur-xl border border-outline-variant shadow-sm rounded-full flex justify-between items-center px-6 py-3 transition-all">
         {leftContent || (
-          <Link href="/" className="font-extrabold tracking-tight text-lg text-on-background flex items-center gap-2.5 group">
-            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-on-primary shadow-sm shadow-primary/20 group-hover:-translate-x-0.5 transition-transform">
-              <span className="material-symbols-outlined text-base">water_drop</span>
+          <Link href="/" className="flex items-center gap-2 group">
+            <Image
+              src={logo}
+              alt="Awas Jentik Logo"
+              width={32}
+              height={32}
+              className="object-contain group-hover:-translate-x-0.5 transition-transform"
+            />
+            <span className="font-bold text-base tracking-tight text-on-background">
+              Awas<span className="text-primary">Jentik</span>
             </span>
-            MalariaWatch
           </Link>
         )}
         

@@ -60,7 +60,12 @@ export default function LaporPage() {
       const result = await apiPostForm<{ kode_laporan: string }>("/lapor", fd);
       router.push(`/lapor/sukses?kode=${result.kode_laporan}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mengirim laporan");
+      // FastAPI 422 detail can be an array of {loc, msg, type} objects
+      let msg = "Gagal mengirim laporan";
+      if (err instanceof Error) {
+        msg = err.message;
+      }
+      setError(msg);
       setSubmitting(false);
     }
   }
@@ -68,24 +73,7 @@ export default function LaporPage() {
   return (
     <div className="min-h-screen relative font-sans text-on-background bg-background water-surface">
 
-      <Header 
-        leftContent={
-          <Link href="/" className="font-extrabold tracking-tight text-lg text-on-background flex items-center gap-2.5 group">
-            <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-hover flex items-center justify-center text-on-primary shadow-md shadow-primary/20 group-hover:-translate-x-0.5 transition-transform">
-              <span className="material-symbols-outlined text-base">arrow_back</span>
-            </span>
-            MalariaWatch
-          </Link>
-        }
-        rightContent={
-          <div className="flex items-center gap-1 md:gap-3">
-             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-subtle text-on-primary-fixed-variant text-xs font-semibold shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              Laporan Baru
-            </div>
-          </div>
-        }
-      />
+      <Header />
 
       <main className="max-w-4xl mx-auto px-6 pt-32 pb-28 md:pb-20">
         <div className="mb-10 text-center md:text-left">
@@ -109,9 +97,13 @@ export default function LaporPage() {
             
             <VillageMapPicker selected={selectedGrid} onSelect={setSelectedGrid} />
 
-            <input type="hidden" name="grid_x" value={selectedGrid?.x ?? ""} />
-            <input type="hidden" name="grid_y" value={selectedGrid?.y ?? ""} />
-            <input type="hidden" name="grid_land" value={selectedGrid?.land ?? ""} />
+            {selectedGrid && (
+              <>
+                <input type="hidden" name="grid_x" value={selectedGrid.x} />
+                <input type="hidden" name="grid_y" value={selectedGrid.y} />
+                <input type="hidden" name="grid_land" value={selectedGrid.land ?? ""} />
+              </>
+            )}
           </section>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">

@@ -19,7 +19,12 @@ interface HoveredCell {
 }
 
 
-export default function LiveCommunityMap() {
+interface LiveCommunityMapProps {
+  /** Compact mode: hides header, padding, tooltip — just canvas + legend */
+  compact?: boolean;
+}
+
+export default function LiveCommunityMap({ compact = false }: LiveCommunityMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hovered, setHovered] = useState<HoveredCell | null>(null);
 
@@ -142,70 +147,168 @@ export default function LiveCommunityMap() {
     setHovered({ x: col + 1, y: row + 1, land: cell.land, risk });
   }
 
-  return (
-    <div className="flex flex-col flex-1 relative z-10 min-h-0 h-full">
-      {/* Header Area */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4 shrink-0">
-        <div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-xl">map</span>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Live Report Heat-Map</h2>
-          <p className="text-slate-500 font-medium">Tracking hotspots in real-time.</p>
-        </div>
-        
-        {/* Tooltip moved here, outside the map */}
-        {hovered ? (
-          <div className="bg-white/95 backdrop-blur-sm px-4 py-3 rounded-xl shadow-sm border border-slate-200/60 text-xs font-medium transition-all min-w-[150px]">
-            <div className="font-bold text-slate-900 mb-2 flex items-center gap-1.5">
-               <span className="material-symbols-outlined text-[16px] text-slate-400">my_location</span>
-               Grid ({hovered.x}, {hovered.y})
-            </div>
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="w-3 h-3 rounded-sm shadow-sm" style={{ backgroundColor: LAND_COLORS[hovered.land] }} />
-              <span className="capitalize text-slate-600">{hovered.land}</span>
-            </div>
-            <div className={`px-2.5 py-1.5 rounded-md text-[11px] uppercase tracking-widest font-bold w-fit ${
-              hovered.risk >= 75 ? 'bg-red-50 text-red-600 border border-red-100' : 
-              hovered.risk >= 50 ? 'bg-orange-50 text-orange-600 border border-orange-100' : 
-              hovered.risk > 0 ? 'bg-yellow-50 text-yellow-600 border border-yellow-100' : 
-              'bg-slate-50 text-slate-500 border border-slate-100'
-            }`}>
-              {hovered.risk > 0 ? `Risk: ${hovered.risk.toFixed(1)}` : 'No Data'}
-            </div>
-          </div>
-        ) : (
-          <div className="px-4 py-3 rounded-xl border border-dashed border-slate-200 text-xs font-medium text-slate-400 flex items-center justify-center h-[100px] min-w-[150px]">
-            Hover map to view details
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4 flex-1 min-h-0">
-        {/* Map Container - responsive to height to avoid cutoff */}
+  /* ── Compact mode (admin dashboard) ───────────────────────────────────── */
+  if (compact) {
+    return (
+      <div className="flex flex-col w-full h-full min-h-0 gap-2">
+        {/* Canvas fills available height */}
         <div className="flex-1 min-h-0 flex items-center justify-center">
-          <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-[#c0b8a8] aspect-square h-full max-h-[500px] max-w-full">
+          <div className="relative rounded-xl overflow-hidden border border-outline-variant/60 bg-[#c0b8a8] aspect-square h-full max-h-full max-w-full shadow-sm">
             <canvas
               ref={canvasRef}
-              className="w-full h-full cursor-crosshair block shadow-inner"
+              className="w-full h-full cursor-crosshair block"
               style={{ imageRendering: "pixelated" }}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setHovered(null)}
             />
-            
-            {/* Map Gradient Overlay to match existing aesthetic */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none rounded-xl" />
           </div>
         </div>
 
-      {/* Legend Container Moved Outside */}
-      <div className="flex flex-wrap items-center justify-center mx-auto gap-x-6 gap-y-3 bg-white/50 backdrop-blur-sm border border-slate-200/80 px-4 py-3 rounded-xl shadow-sm text-xs font-medium text-slate-700 w-fit shrink-0">
-        <div className="text-slate-400 uppercase tracking-widest font-bold text-[10px]">Hotspots</div>
-        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#dc2626] bg-[#dc2626]/40" /> Tinggi (Risk ≥ 75)</div>
-        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#f97316] bg-[#f97316]/40" /> Sedang (Risk ≥ 50)</div>
-        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#eab308] bg-[#eab308]/40" /> Rendah (Risk &lt; 50)</div>
+        {/* ── Bottom bar: legend + tooltip panel side-by-side ──────────── */}
+        <div className="shrink-0 flex items-start gap-3 flex-wrap">
+
+          {/* Hover tooltip — outside the map */}
+          {hovered ? (
+            <div className="bg-surface border border-outline-variant rounded-xl px-3 py-2 text-[11px] font-medium flex items-center gap-3 shadow-sm">
+              <div className="flex items-center gap-1 font-bold text-on-background">
+                <span className="material-symbols-outlined text-[13px] text-primary">my_location</span>
+                Grid ({hovered.x}, {hovered.y})
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm border border-outline-variant/50 shrink-0" style={{ backgroundColor: LAND_COLORS[hovered.land] }} />
+                <span className="capitalize text-on-surface-variant">{hovered.land}</span>
+              </div>
+              <div className={`px-2 py-0.5 rounded-lg text-[10px] uppercase tracking-widest font-bold ${
+                hovered.risk >= 75 ? 'bg-[#ff453a]/10 text-[#ff453a]' :
+                hovered.risk >= 50 ? 'bg-[#ff8c42]/10 text-[#ff8c42]' :
+                hovered.risk > 0  ? 'bg-[#ffc966]/20 text-[#592d00]' :
+                'text-on-surface-variant'
+              }`}>
+                {hovered.risk > 0 ? `Risiko: ${hovered.risk.toFixed(1)}` : 'Tidak ada data'}
+              </div>
+            </div>
+          ) : (
+            <div className="border border-dashed border-outline-variant rounded-xl px-3 py-2 text-[11px] font-medium text-on-surface-variant flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[13px] text-on-surface-variant/50">touch_app</span>
+              Arahkan kursor ke peta
+            </div>
+          )}
+
+          {/* Legend strip */}
+          <div className="flex items-center gap-3 text-[10px] font-medium text-on-surface-variant ml-auto">
+            <span className="text-primary/70 uppercase tracking-widest font-bold">Hotspot</span>
+            <div className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm border-2 border-[#ff453a] bg-[#ff453a]/30 shrink-0" />
+              Kritis ≥75
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm border-2 border-[#ff8c42] bg-[#ff8c42]/30 shrink-0" />
+              Tinggi ≥50
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm border-2 border-[#ffc966] bg-[#ffc966]/40 shrink-0" />
+              Sedang &lt;50
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-sm border-2 border-outline-variant bg-surface-container shrink-0" />
+              Rendah (= 0)
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  /* ── Full mode (landing page) ──────────────────────────────────────────── */
+  return (
+    <div className="flex flex-col flex-1 relative z-10 min-h-0 h-full p-6">
+
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4 shrink-0">
+        <div>
+          <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3 shadow-sm">
+            <span className="material-symbols-outlined text-xl text-primary">map</span>
+          </div>
+          <h2 className="text-xl font-bold text-on-background mb-1">Peta Risiko Live</h2>
+          <p className="text-sm text-on-surface-variant font-medium flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse inline-block" />
+            Diperbarui setiap 30 detik
+          </p>
+        </div>
+
+        {/* Hover tooltip panel */}
+        {hovered ? (
+          <div className="bg-surface/95 backdrop-blur-sm px-4 py-3 rounded-2xl border border-outline-variant shadow-sm text-xs font-medium transition-all min-w-[160px]">
+            <div className="font-bold text-on-background mb-2 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[15px] text-primary">my_location</span>
+              Grid ({hovered.x}, {hovered.y})
+            </div>
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="w-3 h-3 rounded-sm shadow-sm border border-outline-variant/50" style={{ backgroundColor: LAND_COLORS[hovered.land] }} />
+              <span className="capitalize text-on-surface-variant">{hovered.land}</span>
+            </div>
+            <div className={`px-2.5 py-1.5 rounded-lg text-[10px] uppercase tracking-widest font-bold w-fit ${
+              hovered.risk >= 75 ? 'bg-[#ff453a]/10 text-[#ff453a] border border-[#ff453a]/20' :
+              hovered.risk >= 50 ? 'bg-[#ff8c42]/10 text-[#ff8c42] border border-[#ff8c42]/20' :
+              hovered.risk > 0  ? 'bg-[#ffc966]/20 text-[#592d00] border border-[#ffc966]/40' :
+              'bg-surface-container text-on-surface-variant border border-outline-variant'
+            }`}>
+              {hovered.risk > 0 ? `Risiko: ${hovered.risk.toFixed(1)}` : 'Tidak ada data'}
+            </div>
+          </div>
+        ) : (
+          <div className="px-4 py-3 rounded-2xl border border-dashed border-outline-variant text-xs font-medium text-on-surface-variant flex items-center gap-2 h-[88px] min-w-[160px] justify-center">
+            <span className="material-symbols-outlined text-base text-on-surface-variant/50">touch_app</span>
+            Arahkan kursor ke peta
+          </div>
+        )}
+      </div>
+
+      {/* ── Map + Legend side-by-side ─────────────────────────────────────── */}
+      <div className="flex flex-row gap-4 flex-1 min-h-0 items-start">
+
+        {/* Map canvas */}
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <div className="relative rounded-2xl overflow-hidden border border-outline-variant/60 bg-[#c0b8a8] aspect-square h-full max-h-[500px] max-w-full shadow-sm">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full cursor-crosshair block"
+              style={{ imageRendering: "pixelated" }}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setHovered(null)}
+            />
+            {/* Subtle vignette overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none rounded-2xl" />
+          </div>
+        </div>
+
+        {/* ── Legend (vertical, right of map) ──────────────────────────── */}
+        <div className="flex flex-col gap-3 shrink-0 bg-surface/80 backdrop-blur-sm border border-outline-variant/70 px-4 py-4 rounded-2xl text-xs font-medium text-on-surface-variant self-start">
+          <span className="text-primary/70 uppercase tracking-widest font-bold text-[10px] pb-1 border-b border-outline-variant/50">
+            Hotspot
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-sm border-2 border-[#ff453a] bg-[#ff453a]/30 shrink-0" />
+            <span>Kritis (≥ 75)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-sm border-2 border-[#ff8c42] bg-[#ff8c42]/30 shrink-0" />
+            <span>Tinggi (≥ 50)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-sm border-2 border-[#ffc966] bg-[#ffc966]/40 shrink-0" />
+            <span>Sedang (&lt; 50)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-sm border-2 border-outline-variant bg-surface-container shrink-0" />
+            <span>Rendah (= 0)</span>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }
+

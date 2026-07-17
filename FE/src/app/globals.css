@@ -1,65 +1,131 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #00288e;
-  --color-primary-hover: #1e40af;
-  --color-primary-subtle: #e8edf8;
-  --color-on-primary: #ffffff;
-  --color-primary-fixed: #d2e0ff;
-  --color-primary-fixed-dim: #a4c1ff;
-  --color-on-primary-fixed: #001540;
-  --color-on-primary-fixed-variant: #003b9e;
-  --color-primary-container: #1e40af;
-  --color-on-primary-container: #ffffff;
+  /* ── Primary (Hijau / Green brand) ─────────────────────────────────────── */
+  --color-primary: #89d927;
+  --color-primary-hover: #6fba15;
+  --color-primary-subtle: #f0fae0;
+  --color-on-primary: #1a3300;
+  --color-primary-fixed: #c8f090;
+  --color-primary-fixed-dim: #a8dc60;
+  --color-on-primary-fixed: #0d2200;
+  --color-on-primary-fixed-variant: #2e5c00;
+  --color-primary-container: #b8e994;
+  --color-on-primary-container: #1a3300;
+  --color-inverse-primary: #5e8a3c;
 
-  --color-secondary: #2170e4;
+  /* ── Secondary (Kuning / Orange-warm) ──────────────────────────────────── */
+  --color-secondary: #ff9f0a;
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #d4e3ff;
-  --color-on-secondary-container: #001b3e;
-  --color-secondary-fixed: #d4e3ff;
-  --color-secondary-fixed-dim: #a8cbff;
-  --color-on-secondary-fixed: #00112a;
-  --color-on-secondary-fixed-variant: #004fa6;
+  --color-secondary-container: #ffe6b3;
+  --color-on-secondary-container: #592d00;
+  --color-secondary-fixed: #ffe6b3;
+  --color-secondary-fixed-dim: #ffc966;
+  --color-on-secondary-fixed: #3d1a00;
+  --color-on-secondary-fixed-variant: #7a3a00;
 
-  --color-tertiary: #872d00;
+  /* ── Tertiary ───────────────────────────────────────────────────────────── */
+  --color-tertiary: #5e8a3c;
   --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #ffdbcb;
-  --color-on-tertiary-container: #330e00;
-  --color-tertiary-fixed: #ffdbcb;
-  --color-tertiary-fixed-dim: #ffb798;
-  --color-on-tertiary-fixed: #200700;
-  --color-on-tertiary-fixed-variant: #6b2100;
+  --color-tertiary-container: #dcf7c1;
+  --color-on-tertiary-container: #1a3300;
+  --color-tertiary-fixed: #dcf7c1;
+  --color-tertiary-fixed-dim: #bff09e;
+  --color-on-tertiary-fixed: #0d2200;
+  --color-on-tertiary-fixed-variant: #3d6600;
 
-  --color-background: #f8f9ff;
-  --color-on-background: #1a1c1f;
+  /* ── Surfaces & Background ──────────────────────────────────────────────── */
+  --color-background: #f6faf0;
+  --color-on-background: #1a1c18;
 
-  --color-surface: #f8f9ff;
-  --color-on-surface: #1a1c1f;
-  --color-on-surface-variant: #5c5e64;
+  --color-surface: #f6faf0;
+  --color-on-surface: #1a1c18;
+  --color-on-surface-variant: #44483d;
 
   --color-surface-bright: #ffffff;
-  --color-surface-dim: #dde0e6;
-  --color-surface-variant: #e0e2ea;
-  --color-surface-container: #edeef5;
-  --color-surface-container-low: #f0f1f7;
+  --color-surface-dim: #d8ddd1;
+  --color-surface-variant: #dfe4d7;
+  --color-surface-container: #eaeee3;
+  --color-surface-container-low: #edf1e6;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-high: #e1e3ec;
-  --color-surface-container-highest: #dbdde6;
+  --color-surface-container-high: #e0e5d9;
+  --color-surface-container-highest: #dadfd4;
 
+  /* ── Error ──────────────────────────────────────────────────────────────── */
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
   --color-error-container: #ffdad6;
   --color-on-error-container: #410002;
 
-  --color-outline: #72747c;
-  --color-outline-variant: #c6c7d0;
-  --color-surface-tint: #00288e;
-  --color-inverse-surface: #2f3035;
-  --color-inverse-on-surface: #f0f1f7;
+  /* ── Outline & misc ─────────────────────────────────────────────────────── */
+  --color-outline: #74796c;
+  --color-outline-variant: #c3c8bb;
+  --color-surface-tint: #89d927;
+  --color-inverse-surface: #2d3228;
+  --color-inverse-on-surface: #eef2e7;
 }
 
 @theme inline {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  /* ── Map all CSS vars to Tailwind utilities ─────────────────────────────── */
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-subtle: var(--color-primary-subtle);
+  --color-on-primary: var(--color-on-primary);
+  --color-primary-fixed: var(--color-primary-fixed);
+  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-on-primary-fixed: var(--color-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--color-on-primary-fixed-variant);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-inverse-primary: var(--color-inverse-primary);
+
+  --color-secondary: var(--color-secondary);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-secondary-fixed: var(--color-secondary-fixed);
+  --color-secondary-fixed-dim: var(--color-secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--color-on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--color-on-secondary-fixed-variant);
+
+  --color-tertiary: var(--color-tertiary);
+  --color-on-tertiary: var(--color-on-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  --color-on-tertiary-container: var(--color-on-tertiary-container);
+  --color-tertiary-fixed: var(--color-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--color-tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--color-on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--color-on-tertiary-fixed-variant);
+
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+  --color-on-error-container: var(--color-on-error-container);
+
+  --color-background: var(--color-background);
+  --color-on-background: var(--color-on-background);
+  --color-surface: var(--color-surface);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+  --color-surface-tint: var(--color-surface-tint);
+  --color-inverse-surface: var(--color-inverse-surface);
+  --color-inverse-on-surface: var(--color-inverse-on-surface);
+
+  /* ── Fonts ──────────────────────────────────────────────────────────────── */
+  --font-sans: 'Nunito', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
 }
 
 * {
@@ -73,6 +139,7 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);
+  font-family: var(--font-sans);
   min-height: 100dvh;
 }
 
@@ -185,6 +252,8 @@ h3 { font-size: 1.125rem; font-weight: 600; }
   border-radius: 20px;
 }
 
+/* ── Animations ─────────────────────────────────────────────────────────── */
+
 @keyframes slideUpFade {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -216,3 +285,119 @@ h3 { font-size: 1.125rem; font-weight: 600; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ── Floating mascot / decorative elements ──────────────────────────────── */
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-14px) rotate(3deg); }
+  66%       { transform: translateY(-6px) rotate(-2deg); }
+}
+
+@keyframes floatYReverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(10px) rotate(-4deg); }
+  66%       { transform: translateY(4px) rotate(2deg); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.float-mascot {
+  animation: floatY 5s ease-in-out infinite;
+}
+.float-mascot-alt {
+  animation: floatYReverse 6s ease-in-out infinite;
+}
+.float-mascot-slow {
+  animation: floatY 8s ease-in-out infinite;
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Water Ripple — "Awas Jentik" signature ─────────────────────────────── */
+
+@keyframes rippleExpand {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.5;
+    border-width: 1.5px;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+    border-width: 0.3px;
+  }
+}
+
+@keyframes dropletFall {
+  0%, 100% { opacity: 0; transform: translateY(-12px) scale(0.8); }
+  15%, 85% { opacity: 0.6; transform: translateY(0) scale(1); }
+}
+
+.water-surface {
+  position: relative;
+}
+
+.water-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .water-surface .ripple-ring {
+    animation: none;
+    opacity: 0.15;
+    transform: scale(1.8);
+  }
+  .water-surface .ripple-droplet {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
+/* ── Gradient mesh backgrounds ──────────────────────────────────────────── */
+
+.hero-mesh {
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(137,217,39,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(94,138,60,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 60% 10%, rgba(255,159,10,0.07) 0%, transparent 70%);
+}
+
+/* ── Card hover glow ────────────────────────────────────────────────────── */
+
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 20px 48px rgba(137,217,39,0.13), 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* ── Dot grid background pattern ────────────────────────────────────────── */
+
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(137,217,39,0.2) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

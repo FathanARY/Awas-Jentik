@@ -114,29 +114,23 @@ export default function KaderLaporanDetailPage() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-background">
-      <Header
-        leftContent={
-          <div className="flex items-center gap-4">
-            <Link href="/kader" aria-label="Kembali" className="p-2 -ml-2 rounded-full transition-colors flex items-center text-on-background hover:bg-surface-container-low">
-              <span className="material-symbols-outlined text-2xl hover:-translate-x-0.5 transition-transform">arrow_back</span>
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold text-on-background">Detail Laporan #{data.kode_laporan}</h1>
-              <p className="text-xs font-medium text-on-surface-variant">{data.alamat || "Lokasi"} · {new Date(data.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</p>
-            </div>
-          </div>
-        }
-        rightContent={
-          <div className="hidden md:flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${data.status === "ditindaklanjuti" ? "bg-green-100 text-green-700" : data.status === "terverifikasi" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
-              <span className="material-symbols-outlined text-sm">{data.status === "ditindaklanjuti" ? "check_circle" : data.status === "terverifikasi" ? "verified" : "sync"}</span>
-              {data.status}
-            </span>
-          </div>
-        }
-      />
+      <Header />
 
       <main className="flex-grow max-w-7xl mx-auto w-full p-4 pt-32 md:p-12 md:pt-36">
+        {/* Page title row */}
+        <div className="flex items-center gap-3 mb-4">
+          <Link href="/kader" aria-label="Kembali" className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-surface-container" style={{ color: "var(--color-on-surface-variant)" }}>
+            <span className="material-symbols-outlined">arrow_back</span>
+          </Link>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold" style={{ color: "var(--color-on-surface)" }}>Detail Laporan #{data.kode_laporan}</h1>
+            <p className="text-xs font-medium" style={{ color: "var(--color-on-surface-variant)" }}>{data.alamat || "Lokasi"} · {new Date(data.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</p>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${data.status === "ditindaklanjuti" ? "bg-green-100 text-green-700" : data.status === "terverifikasi" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
+            <span className="material-symbols-outlined text-sm">{data.status === "ditindaklanjuti" ? "check_circle" : data.status === "terverifikasi" ? "verified" : "sync"}</span>
+            {data.status}
+          </span>
+        </div>
         {actionMsg && (
           <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2" style={actionMsg.includes("gagal") ? { backgroundColor: "var(--color-error-container)", color: "var(--color-on-error-container)" } : { backgroundColor: "var(--color-primary-subtle)", color: "var(--color-on-primary-fixed-variant)" }}>
             <span className="material-symbols-outlined text-lg">{actionMsg.includes("gagal") ? "error" : "check_circle"}</span>

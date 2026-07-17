@@ -33,7 +33,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Header leftContent={<div className="font-extrabold tracking-tight text-lg text-on-background">MalariaWatch</div>} />
+      <Header />
       <div className="w-full max-w-md rounded-3xl shadow-lg bg-surface p-8">
         <h1 className="text-2xl font-bold mb-6 text-on-background">Buat Akun</h1>
 

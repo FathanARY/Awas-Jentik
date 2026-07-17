@@ -183,62 +183,44 @@ export default function AdminDashboardPage() {
       style={{ backgroundColor: "var(--color-background)" }}
     >
 
-      <Header 
-        leftContent={
-          <div className="font-extrabold tracking-tight text-lg text-slate-900 flex items-center gap-2.5">
-            Admin Dashboard
-          </div>
-        }
-        rightContent={
-          <div className="flex items-center gap-4">
-            <div className="relative hidden md:flex items-center text-slate-500">
-              <span className="material-symbols-outlined absolute left-2">search</span>
-              <input
-                className="pl-8 pr-4 py-2 rounded-full border border-slate-200 bg-white/50 text-sm outline-none transition-all w-64 focus:bg-white"
-                placeholder="Search data..."
-                type="text"
-              />
-            </div>
-            <div className="relative" ref={notifRef}>
-            <button onClick={() => setShowNotif(!showNotif)} className="p-2 rounded-full text-slate-600 hover:text-blue-600 transition-colors relative">
-              <span className="material-symbols-outlined">notifications</span>
-              {unreadCount > 0 && <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500" />}
-            </button>
-            {showNotif && (
-              <div className="absolute right-0 top-10 w-80 max-h-96 overflow-y-auto rounded-xl shadow-xl border bg-white z-50" style={{ borderColor: "var(--color-outline-variant)" }}>
-                <div className="p-3 border-b font-bold text-sm" style={{ borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface)" }}>
-                  Notifications {unreadCount > 0 && `(${unreadCount})`}
-                </div>
-                {notifications.length === 0 ? (
-                  <div className="p-4 text-sm text-center" style={{ color: "var(--color-on-surface-variant)" }}>No notifications</div>
-                ) : notifications.slice(0, 10).map(n => (
-                  <div key={n.id} onClick={() => markNotifRead(n.id)} className={`p-3 border-b cursor-pointer transition-colors ${n.dibaca ? "" : "bg-blue-50"}`} style={{ borderColor: "var(--color-outline-variant)" }}>
-                    <p className="text-xs font-medium" style={{ color: n.dibaca ? "var(--color-on-surface-variant)" : "var(--color-on-surface)" }}>{n.message}</p>
-                    <p className="text-xs mt-1" style={{ color: "var(--color-outline)" }}>{new Date(n.created_at).toLocaleString("id-ID")}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-            </div>
-            <button onClick={() => csvInputRef.current?.click()} className="px-4 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition-colors flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm">upload_file</span>
-              CSV
-            </button>
-            <input ref={csvInputRef} type="file" accept=".csv" onChange={handleCsvUpload} className="hidden" />
-            {csvUploading && <span className="text-xs text-blue-600 animate-pulse">Uploading...</span>}
-            {csvResult && <span className="text-xs text-green-600 max-w-[200px] truncate hidden md:inline">{csvResult}</span>}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAza4dAlhNHG15GBa7SuVYmgB2R7x7sWS7pLuy4x6llcKHX3cS8jT7eaU0e7mzeTf7-pBV3iTAfeuZ_siENuL5vEcASlFDr0OekQ4V-GaQAg-V8AXVBmWBYq0gaT3gb1qlcQEysFMuRm2uYS16sH2FnCctpS5oRWPECF7LBs7UaCuCrt7To0rpI3JpRpeJvyrj5bBXwigtV9fnPnrphEupFWM4gBIH9MmoCOeoXh2Uy2lkSocWfdFreOQ"
-              alt="Health Worker Avatar"
-              className="w-8 h-8 rounded-full object-cover border border-slate-200 ml-2"
-            />
-          </div>
-        }
-      />
+      <Header />
+      <input ref={csvInputRef} type="file" accept=".csv" onChange={handleCsvUpload} className="hidden" />
 
       {/* Main Content */}
       <main className="p-4 pt-32 md:p-12 md:pt-36 min-h-screen w-full max-w-[1600px] mx-auto">
+        {/* Admin toolbar */}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-extrabold tracking-tight" style={{ color: "var(--color-on-surface)" }}>Admin Dashboard</h1>
+          <div className="flex items-center gap-2" ref={notifRef}>
+            {csvUploading && <span className="text-xs animate-pulse" style={{ color: "var(--color-primary)" }}>Uploading...</span>}
+            {csvResult && <span className="text-xs max-w-[200px] truncate hidden md:inline" style={{ color: "#059669" }}>{csvResult}</span>}
+            <button onClick={() => csvInputRef.current?.click()} className="px-4 py-2 rounded-full text-xs font-bold border transition-colors flex items-center gap-1" style={{ backgroundColor: "var(--color-surface)", borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}>
+              <span className="material-symbols-outlined text-sm">upload_file</span>
+              CSV
+            </button>
+            <div className="relative">
+              <button onClick={() => setShowNotif(!showNotif)} className="w-10 h-10 rounded-full flex items-center justify-center relative transition-colors" style={{ color: "var(--color-on-surface-variant)" }}>
+                <span className="material-symbols-outlined">notifications</span>
+                {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error" />}
+              </button>
+              {showNotif && (
+                <div className="absolute right-0 top-12 w-80 max-h-96 overflow-y-auto rounded-xl shadow-xl border z-50" style={{ borderColor: "var(--color-outline-variant)", backgroundColor: "var(--color-surface)" }}>
+                  <div className="p-3 border-b font-bold text-sm" style={{ borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface)" }}>
+                    Notifications {unreadCount > 0 && `(${unreadCount})`}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-sm text-center" style={{ color: "var(--color-on-surface-variant)" }}>No notifications</div>
+                  ) : notifications.slice(0, 10).map(n => (
+                    <div key={n.id} onClick={() => markNotifRead(n.id)} className="p-3 border-b cursor-pointer transition-colors hover:bg-surface-container" style={{ borderColor: "var(--color-outline-variant)", backgroundColor: n.dibaca ? "transparent" : "rgba(137,217,39,0.06)" }}>
+                      <p className="text-xs font-medium" style={{ color: n.dibaca ? "var(--color-on-surface-variant)" : "var(--color-on-surface)" }}>{n.message}</p>
+                      <p className="text-xs mt-1" style={{ color: "var(--color-outline)" }}>{new Date(n.created_at).toLocaleString("id-ID")}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
         {stats && (
           <div className="grid grid-cols-4 gap-4 mb-6 mt-4">
             {[
@@ -261,8 +243,23 @@ export default function AdminDashboardPage() {
         )}
         <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-280px)] min-h-[500px]">
           {/* Map */}
-          <div className="flex-1 min-h-0 bg-white p-6 rounded-2xl border shadow-sm flex flex-col" style={{ borderColor: "var(--color-outline-variant)" }}>
-            <LiveCommunityMap />
+          <div className="flex-1 min-h-0 bg-white p-4 rounded-2xl border shadow-sm flex flex-col" style={{ borderColor: "var(--color-outline-variant)" }}>
+            {/* Map card header */}
+            <div className="flex items-center gap-2 mb-3 shrink-0">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "var(--color-primary)15", color: "var(--color-primary)" }}>
+                <span className="material-symbols-outlined text-base">map</span>
+              </div>
+              <div>
+                <h2 className="text-sm font-bold" style={{ color: "var(--color-on-surface)" }}>Peta Risiko Live</h2>
+                <p className="text-[10px] font-medium flex items-center gap-1" style={{ color: "var(--color-on-surface-variant)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
+                  Diperbarui setiap 30 detik
+                </p>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0">
+              <LiveCommunityMap compact />
+            </div>
           </div>
 
           {/* Tabbed Panel */}
