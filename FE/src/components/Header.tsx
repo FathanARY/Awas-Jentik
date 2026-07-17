@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { apiFetch } from "@/app/api";
 
 interface HeaderProps {
   leftContent?: React.ReactNode;
@@ -11,6 +12,21 @@ interface HeaderProps {
 
 export default function Header({ leftContent, rightContent }: HeaderProps) {
   const { user, logout } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      apiFetch<{ count: number }>("/notifications/unread/count")
+        .then(r => setUnreadCount(r.count))
+        .catch(() => {});
+      const interval = setInterval(() => {
+        apiFetch<{ count: number }>("/notifications/unread/count")
+          .then(r => setUnreadCount(r.count))
+          .catch(() => {});
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] p-4 md:p-6 pointer-events-none">
@@ -26,12 +42,18 @@ export default function Header({ leftContent, rightContent }: HeaderProps) {
         
         {rightContent || (
           <div className="flex items-center gap-1 md:gap-3">
-            <button
-              className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-white/60 transition-colors"
-              aria-label="Notifications"
-            >
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
+            {user && (
+              <Link
+                href="/notifikasi"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-white/60 transition-colors relative"
+                aria-label="Notifications"
+              >
+                <span className="material-symbols-outlined">notifications</span>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500" />
+                )}
+              </Link>
+            )}
             
             {user ? (
               <div className="relative group">
@@ -51,6 +73,14 @@ export default function Header({ leftContent, rightContent }: HeaderProps) {
                       Admin Dashboard
                     </Link>
                   )}
+                  {(user.role === "kader" || user.role === "admin") && (
+                    <Link href="/kader" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                      Kader Dashboard
+                    </Link>
+                  )}
+                  <Link href="/riwayat" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                    Riwayat Laporan
+                  </Link>
                   <button
                     onClick={logout}
                     className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 transition-colors rounded-b-xl"

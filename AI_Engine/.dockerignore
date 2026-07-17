@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_tmp/
+pytest.ini
+
+# Virtual environments
+.venv/
+.bootstrap-venv/
+venv/
+ENV/
+env/
+.env
+
+# uv package manager
+.uv-cache/
+uv.lock
+
+# Data and Artifacts (except the ones we explicitly copy)
+# We ignore the entire models/ and data/ folder initially,
+# BUT we explicitly COPY them in the Dockerfile.
+# Wait, actually Dockerfile COPY models/ ./models/ will respect .dockerignore!
+# If we ignore models/ in .dockerignore, COPY models/ will copy NOTHING!
+# So we MUST NOT ignore models/ or data/ or the excel file here.
+
+# Reports & logs
+reports/
+*.log
+garuda70_audit.sqlite3*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

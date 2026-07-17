@@ -1,0 +1,44 @@
+# ============================================================
+# Garuda70 — docker-compose.yml
+# Digunakan untuk pengujian lokal sebelum deploy ke Railway.
+#
+# Perintah:
+#   docker compose up --build      → build & jalankan
+#   docker compose down            → hentikan & hapus container
+#   docker compose logs -f api     → lihat log real-time
+# ============================================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: garuda70-api
+    image: garuda70:local
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      # Matikan buffering Python agar log langsung muncul
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+
+    # Simpan SQLite audit log agar tidak hilang saat container di-restart.
+    # Path sesuai config.yaml: api.audit_database = data/garuda70_audit.sqlite3
+    volumes:
+      - garuda70_audit_data:/app/data
+
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Restart otomatis kecuali di-stop manual (berguna untuk demo/lomba)
+    restart: unless-stopped
+
+volumes:
+  garuda70_audit_data:
+    driver: local

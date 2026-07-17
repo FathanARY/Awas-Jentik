@@ -1,0 +1,24 @@
+{
+  "schema_feature_order": [
+    "luas_genangan_m2",
+    "curah_hujan_bulanan_mm",
+    "jarak_sungai_m",
+    "jarak_rawa_m",
+    "jarak_sawah_m",
+    "jarak_hutan_m",
+    "jarak_tambang_m",
+    "lumut_level",
+    "vegetasi_level",
+    "paparan_matahari",
+    "air_tenang"
+  ],
+  "model_version": "hrs-xgboost-v1",
+  "model_type": "xgboost",
+  "fitted_filename": "hrs_winner_model.joblib",
+  "artifact_sha256": {
+    "preprocessor": "1ed91c1a3c96480b07daf37932982df64b9a795816b9e8a450579360d2232efe",
+    "fitted_model": "9d23b6e3802cff9099fd295501fd1df25c8aa5c5ccf45bc68893426fcd882f47",
+    "metadata": "ed9ec562a3dc78b80abd8a7b4baa55bc7bf28732192049f1f4679ac2bf75b3dc",
+    "shap_background": "a50c3bf1fc3e5e36c35194b10284b8da06874ccecf8c16f925dca37f281bc60d"
+  }
+}

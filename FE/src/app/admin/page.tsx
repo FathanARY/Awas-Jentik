@@ -51,6 +51,15 @@ interface LaporanItem {
   alamat: string | null;
 }
 
+interface CsvPreviewData {
+  upload_id: string;
+  total_rows: number;
+  valid_rows: number;
+  invalid_rows: number;
+  summary: string;
+  rows: { grid_id: string; pendatang_30_hari: number; pendatang_dari_endemis: number; pekerja_mobil: number; riwayat_perjalanan_endemis: number; valid: boolean; error: string | null }[];
+}
+
 function getAreaStyle(score: number) {
   if (score >= 80) return { borderColor: "var(--color-error)", chipBg: "var(--color-error-container)", chipFg: "var(--color-on-error-container)", scoreFg: "var(--color-error)", icon: "trending_up" };
   if (score >= 60) return { borderColor: "#f59e0b", chipBg: "#fef3c7", chipFg: "#92400e", scoreFg: "#b45309", icon: "warning" };
@@ -70,11 +79,13 @@ export default function AdminDashboardPage() {
   const [laporans, setLaporans] = useState<LaporanItem[]>([]);
   const [csvUploading, setCsvUploading] = useState(false);
   const [csvResult, setCsvResult] = useState<string | null>(null);
+  const [csvPreview, setCsvPreview] = useState<CsvPreviewData | null>(null);
+  const [csvUploadId, setCsvUploadId] = useState<string | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "admin")) {
+    if (!loading && (!user || (user.role !== "admin" && user.role !== "kader"))) {
       router.push("/");
     }
   }, [user, loading, router]);
@@ -101,22 +112,55 @@ export default function AdminDashboardPage() {
     if (!file) return;
     setCsvUploading(true);
     setCsvResult(null);
+    setCsvPreview(null);
     const fd = new FormData();
     fd.append("file", file);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/upload-csv`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/upload-csv/preview`, {
         method: "POST",
         body: fd,
         headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
       });
-      const data = await res.json();
-      setCsvResult(`${data.rows_updated} grid updated, ${data.categories_changed} changed.`);
-      apiFetch<{ changes: ChangeItem[] }>("/changes").then(r => setChanges(r.changes)).catch(() => {});
+      const data: CsvPreviewData = await res.json();
+      setCsvPreview(data);
+      setCsvUploadId(data.upload_id);
     } catch {
-      setCsvResult("Upload failed.");
+      setCsvResult("Preview failed.");
     }
     setCsvUploading(false);
     e.target.value = "";
+  }
+
+  async function handleCsvConfirm() {
+    if (!csvUploadId) return;
+    setCsvUploading(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/upload-csv/${csvUploadId}/confirm`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+      });
+      const data = await res.json();
+      setCsvResult(`${data.rows_updated} grid updated, ${data.categories_changed} changed.`);
+      setCsvPreview(null);
+      setCsvUploadId(null);
+      apiFetch<{ changes: ChangeItem[] }>("/changes").then(r => setChanges(r.changes)).catch(() => {});
+    } catch {
+      setCsvResult("Confirm failed.");
+    }
+    setCsvUploading(false);
+  }
+
+  async function handleCsvCancel() {
+    if (!csvUploadId) return;
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/upload-csv/${csvUploadId}/cancel`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+      });
+    } catch {}
+    setCsvPreview(null);
+    setCsvUploadId(null);
+    setCsvResult("Upload cancelled.");
   }
 
   async function markNotifRead(id: number) {
@@ -128,7 +172,7 @@ export default function AdminDashboardPage() {
     setUnreadCount(prev => Math.max(0, prev - 1));
   }
 
-  if (loading || !user || user.role !== "admin") {
+  if (loading || !user || (user.role !== "admin" && user.role !== "kader")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -391,6 +435,77 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
+
+        {csvPreview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl border max-w-lg w-full mx-4 overflow-hidden" style={{ borderColor: "var(--color-outline-variant)" }}>
+              <div className="p-6 border-b" style={{ borderColor: "var(--color-outline-variant)" }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,40,142,0.1)" }}>
+                    <span className="material-symbols-outlined" style={{ color: "var(--color-primary)" }}>preview</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold" style={{ color: "var(--color-on-surface)" }}>CSV Preview</h3>
+                    <p className="text-sm" style={{ color: "var(--color-on-surface-variant)" }}>Review before committing</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3 rounded-lg text-center" style={{ backgroundColor: "var(--color-surface-container)" }}>
+                    <p className="text-2xl font-bold" style={{ color: "var(--color-primary)" }}>{csvPreview.total_rows}</p>
+                    <p className="text-xs" style={{ color: "var(--color-on-surface-variant)" }}>Total Rows</p>
+                  </div>
+                  <div className="p-3 rounded-lg text-center bg-green-50">
+                    <p className="text-2xl font-bold text-green-700">{csvPreview.valid_rows}</p>
+                    <p className="text-xs text-green-600">Valid</p>
+                  </div>
+                  <div className="p-3 rounded-lg text-center bg-red-50">
+                    <p className="text-2xl font-bold text-red-700">{csvPreview.invalid_rows}</p>
+                    <p className="text-xs text-red-600">Invalid</p>
+                  </div>
+                </div>
+                <div className="p-4 rounded-lg border" style={{ backgroundColor: "var(--color-surface-container)", borderColor: "var(--color-outline-variant)" }}>
+                  <p className="text-sm font-medium" style={{ color: "var(--color-on-surface)" }}>{csvPreview.summary}</p>
+                </div>
+                {csvPreview.invalid_rows > 0 && (
+                  <div className="max-h-32 overflow-y-auto space-y-1">
+                    {csvPreview.rows.filter(r => !r.valid).map((r, i) => (
+                      <div key={i} className="text-xs p-2 rounded bg-red-50 text-red-700">
+                        {r.grid_id}: {r.error}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="p-4 border-t flex gap-3 justify-end" style={{ borderColor: "var(--color-outline-variant)" }}>
+                <button
+                  onClick={handleCsvCancel}
+                  disabled={csvUploading}
+                  className="px-6 py-2 rounded-full text-sm font-bold border transition-colors hover:bg-slate-50 disabled:opacity-50"
+                  style={{ borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCsvConfirm}
+                  disabled={csvUploading || csvPreview.valid_rows === 0}
+                  className="px-6 py-2 rounded-full text-sm font-bold shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex items-center gap-2"
+                  style={{ backgroundColor: "var(--color-primary)", color: "var(--color-on-primary)" }}
+                >
+                  {csvUploading ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                      Committing...
+                    </>
+                  ) : (
+                    `Confirm (${csvPreview.valid_rows} rows)` 
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

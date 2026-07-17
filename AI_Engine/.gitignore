@@ -1,0 +1,16 @@
+.venv/
+.bootstrap-venv/
+.uv-cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.env
+data/processed/*.parquet
+data/processed/*.json
+models/tabpfn_foundation/*
+reports/*.json
+.pytest_tmp/
+pytest.ini
+data/garuda70_audit.sqlite3*
+docs/

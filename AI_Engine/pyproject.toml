@@ -1,0 +1,49 @@
+[project]
+name = "garuda70"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.139.2",
+    "joblib>=1.5.3",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.3",
+    "pyarrow>=25.0.0",
+    "pydantic>=2.13.4",
+    "python-multipart>=0.0.32",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.0",
+    "shap>=0.52.0",
+    "tabpfn>=8.1.0",
+    "torch==2.7.0+cu128",
+    "xgboost>=2.1.0",
+    "uvicorn[standard]>=0.51.0",
+]
+
+[project.scripts]
+garuda70-generate = "src.data.generate:main"
+garuda70-train = "src.models.train:main"
+garuda70-prefetch = "scripts.prefetch_tabpfn_checkpoint:main"
+garuda70-verify-bundle = "scripts.verify_model_bundle:main"
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.15.22",
+]
+
+[tool.pytest.ini_options]
+tmp_path_retention_policy = "failed"
+basetemp = ".pytest_tmp"
