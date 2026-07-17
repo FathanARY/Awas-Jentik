@@ -8,113 +8,67 @@ export const metadata = {
 
 import Header from "@/components/Header";
 import LiveCommunityMap from "@/components/LiveCommunityMap";
-import FlyingMosquito from "@/components/FlyingMosquito";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen relative font-sans text-on-background">
-      <div className="fixed inset-0 z-[-1] bg-background">
-        <div className="absolute top-0 -left-10 w-96 h-96 bg-primary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
-        <div className="absolute top-0 -right-10 w-96 h-96 bg-secondary-container rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 left-20 w-96 h-96 bg-primary-fixed-dim rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light" />
-      </div>
-
+    <div className="min-h-screen relative font-sans text-on-background bg-background">
       <Header />
 
-      <main className="max-w-5xl mx-auto px-6 pt-36 pb-28 md:pb-20">
-        <section className="relative overflow-hidden flex flex-col items-center text-center mt-8 mb-20 md:mt-16 md:mb-24">
-          <FlyingMosquito />
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-on-background max-w-3xl leading-[1.1] mb-6">
-            Stop Malaria <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-hover">Before It Spreads.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-on-surface-variant max-w-2xl mb-10 leading-relaxed font-medium">
-            Nyamuk berkembang biak di air tergenang. Laporan Anda membantu tim tanggap cepat mendeteksi dan menghilangkan genangan berisiko tinggi secara real-time.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-            <Link
-              href="/lapor"
-              className="group w-full sm:w-auto px-8 py-4 rounded-full bg-primary text-on-primary font-bold text-sm shadow-xl shadow-primary/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">add_location</span>
-              Laporkan Genangan
-            </Link>
+      {/* Hero — Water Ripple Signature */}
+      <section className="relative overflow-hidden flex flex-col items-center justify-center min-h-[85vh] md:min-h-[90vh] text-center px-6 pt-20 water-surface">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+          <div className="relative w-72 h-72 md:w-96 md:h-96">
+            {[0, 1.5, 3, 4.5].map((delay, i) => (
+              <div
+                key={i}
+                className="ripple-ring absolute inset-0 rounded-full border border-primary/30"
+                style={{
+                  animation: `rippleExpand 6s ease-out infinite`,
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            ))}
+            <div
+              className="ripple-droplet absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-primary/60"
+              style={{ animation: 'dropletFall 6s ease-out infinite' }}
+            />
           </div>
-        </section>
+        </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          <div className="md:col-span-2 rounded-3xl p-6 md:p-8 bg-surface backdrop-blur-xl border border-outline-variant shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-primary-fixed to-transparent opacity-50 rounded-bl-full pointer-events-none" />
-            <LiveCommunityMap />
-          </div>
+        <h1 className="font-display text-6xl sm:text-7xl md:text-8xl font-bold tracking-[-0.03em] text-on-background mb-5 leading-[1.05] max-w-2xl">
+          Awas<span className="text-primary">Jentik</span>
+        </h1>
+        <p className="text-lg md:text-xl text-on-surface-variant max-w-xl mb-10 leading-relaxed font-medium">
+          Satu laporan genangan air bisa mencegah satu wabah malaria. Laporkan genangan di sekitar Anda dalam 2 menit.
+        </p>
+        <Link
+          href="/lapor"
+          className="group px-8 py-4 rounded-full bg-primary text-on-primary font-bold text-sm shadow-lg shadow-primary/20 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] transition-all flex items-center gap-2"
+        >
+          <span className="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">add_location</span>
+          Laporkan Genangan
+        </Link>
 
-          <div className="flex flex-col gap-6 md:gap-8">
-            <div className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-inverse-surface to-inverse-surface text-white shadow-lg relative overflow-hidden flex flex-col justify-between">
-              <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary rounded-full blur-3xl opacity-30 pointer-events-none" />
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-primary-fixed">
-                  <span className="material-symbols-outlined text-xl">analytics</span>
-                </div>
-                <h2 className="text-2xl font-bold mb-2">Dampak Kami</h2>
-                <p className="text-on-surface-variant font-medium text-sm">Bersama kita membuat perubahan.</p>
-              </div>
-              
-              <div className="mt-8 flex flex-col gap-5">
-                <div>
-                  <div className="text-4xl font-extrabold text-white mb-1">124</div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-primary-fixed-dim">Laporan Ditangani</div>
-                </div>
-                <div className="h-px w-full bg-white/10" />
-                <div>
-                  <div className="text-4xl font-extrabold text-white mb-1">850+</div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-primary-fixed-dim">Warga Aktif</div>
-                </div>
-              </div>
+        <div className="mt-16 md:mt-20 flex gap-10 md:gap-16 text-center">
+          {[
+            { value: "124", label: "Laporan Ditangani" },
+            { value: "850+", label: "Warga Aktif" },
+            { value: "4", label: "Kategori Risiko" },
+          ].map((stat) => (
+            <div key={stat.label}>
+              <div className="text-3xl md:text-4xl font-extrabold text-on-background tracking-tight">{stat.value}</div>
+              <div className="text-xs md:text-sm font-semibold text-on-surface-variant mt-1">{stat.label}</div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="rounded-3xl p-6 md:p-8 bg-surface shadow-sm flex flex-col justify-center">
-              <div className="mb-4 relative w-12 h-12">
-                <span className="material-symbols-outlined text-[3.5rem] text-primary leading-none">person</span>
-                <div className="absolute -bottom-1 -right-1 bg-surface rounded-full">
-                  <span className="material-symbols-outlined text-2xl text-primary leading-none filled-icon">verified_user</span>
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold text-on-background mb-3 tracking-tight mt-2">AI di Mana Saja</h3>
-              <p className="text-base text-on-surface-variant font-semibold leading-snug">
-                Laporkan. Kumpulkan titik berkualitas dan dukung tim yang lengkap.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-3xl p-6 md:p-8 bg-surface backdrop-blur-xl border border-outline-variant shadow-sm flex flex-col items-center text-center">
-            <div className="w-16 h-16 rounded-full bg-primary-subtle text-primary flex items-center justify-center mb-6 shadow-sm">
-              <span className="material-symbols-outlined text-3xl">memory</span>
-            </div>
-            <h3 className="text-xl font-bold text-on-background mb-3">Verifikasi AI</h3>
-            <p className="text-sm text-on-surface-variant font-medium leading-relaxed">
-              Setiap foto yang Anda kirim dianalisis otomatis oleh AI kami untuk mengonfirmasi karakteristik tempat perkembangbiakan, memastikan tim tanggap cepat memprioritaskan area risiko tertinggi.
-            </p>
-          </div>
-
-          <div className="md:col-span-2 rounded-3xl p-6 md:p-8 bg-primary text-on-primary shadow-lg flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative">
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-20 pointer-events-none" />
-            
-            <div className="relative z-10 max-w-sm text-center sm:text-left">
-              <h3 className="text-2xl font-bold mb-2">Siap berkontribusi?</h3>
-              <p className="text-primary-fixed font-medium text-sm">Hanya butuh 2 menit untuk melaporkan genangan air mencurigakan dan menyelamatkan nyawa.</p>
-            </div>
-            
-            <Link
-              href="/lapor"
-              className="relative z-10 px-8 py-4 rounded-full bg-on-primary text-primary font-bold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all whitespace-nowrap flex items-center gap-2"
-            >
-              Mulai Melapor
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </Link>
-          </div>
-        </section>
-      </main>
+      {/* Map Section */}
+      <section className="max-w-5xl mx-auto px-4 md:px-6 pb-24">
+        <div className="rounded-3xl bg-surface border border-outline-variant shadow-sm overflow-hidden">
+          <LiveCommunityMap />
+        </div>
+      </section>
 
       <footer className="w-full text-center py-8 text-sm font-medium text-on-surface-variant border-t border-outline-variant bg-surface">
         © 2026 MalariaWatch. Dibangun untuk komunitas yang lebih sehat.

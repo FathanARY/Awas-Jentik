@@ -74,13 +74,7 @@ export default function LaporPage() {
   }
 
   return (
-    <div className="min-h-screen relative font-sans text-on-background">
-      <div className="fixed inset-0 z-[-1] bg-background">
-        <div className="absolute top-0 -left-10 w-96 h-96 bg-primary-fixed rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
-        <div className="absolute top-0 -right-10 w-96 h-96 bg-secondary-container rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 left-20 w-96 h-96 bg-primary-fixed-dim rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light" />
-      </div>
+    <div className="min-h-screen relative font-sans text-on-background bg-background water-surface">
 
       <Header 
         leftContent={
