@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!loading && (!user || user.user_metadata?.role !== "admin")) {
+    if (!loading && (!user || user.role !== "admin")) {
       router.push("/");
     }
   }, [user, loading, router]);
@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
     setUnreadCount(prev => Math.max(0, prev - 1));
   }
 
-  if (loading || !user || user.user_metadata?.role !== "admin") {
+  if (loading || !user || user.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
