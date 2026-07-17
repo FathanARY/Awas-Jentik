@@ -146,6 +146,9 @@ def seed_demo(session: Session):
 
 
 if __name__ == "__main__":
-    SQLModel.metadata.create_all(engine)
-    with Session(engine) as session:
-        seed_demo(session)
+    try:
+        SQLModel.metadata.create_all(engine)
+        with Session(engine) as session:
+            seed_demo(session)
+    except Exception as e:
+        print(f"Seed error (server will start anyway): {e}")
