@@ -57,27 +57,44 @@ export default function HomePage() {
             <LiveCommunityMap />
           </div>
 
-          {/* Card 2: Quick Stats */}
-          <div className="self-start rounded-3xl p-6 md:p-8 bg-gradient-to-br from-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
-            <div className="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500 rounded-full blur-3xl opacity-30 pointer-events-none" />
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-indigo-300">
-                <span className="material-symbols-outlined text-xl">analytics</span>
+          {/* Right Column Container */}
+          <div className="flex flex-col gap-6 md:gap-8">
+            {/* Card 2: Quick Stats */}
+            <div className="rounded-3xl p-6 md:p-8 bg-gradient-to-br from-slate-900 to-indigo-950 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500 rounded-full blur-3xl opacity-30 pointer-events-none" />
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-4 text-indigo-300">
+                  <span className="material-symbols-outlined text-xl">analytics</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Our Impact</h2>
+                <p className="text-slate-300 font-medium text-sm">Together we&apos;re making a difference.</p>
               </div>
-              <h2 className="text-2xl font-bold mb-2">Our Impact</h2>
-              <p className="text-slate-300 font-medium text-sm">Together we&apos;re making a difference.</p>
+              
+              <div className="mt-8 flex flex-col gap-5">
+                <div>
+                  <div className="text-4xl font-extrabold text-white mb-1">124</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-indigo-300">Completed Reports</div>
+                </div>
+                <div className="h-px w-full bg-white/10" />
+                <div>
+                  <div className="text-4xl font-extrabold text-white mb-1">850+</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-indigo-300">Active Citizens</div>
+                </div>
+              </div>
             </div>
-            
-            <div className="mt-8 flex flex-col gap-5">
-              <div>
-                <div className="text-4xl font-extrabold text-white mb-1">124</div>
-                <div className="text-xs font-bold uppercase tracking-widest text-indigo-300">Completed Reports</div>
+
+            {/* AI in q.where Banner */}
+            <div className="rounded-3xl p-6 md:p-8 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-center">
+              <div className="mb-4 relative w-12 h-12">
+                <span className="material-symbols-outlined text-[3.5rem] text-blue-600 leading-none">person</span>
+                <div className="absolute -bottom-1 -right-1 bg-white rounded-full">
+                  <span className="material-symbols-outlined text-2xl text-blue-600 leading-none" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
+                </div>
               </div>
-              <div className="h-px w-full bg-white/10" />
-              <div>
-                <div className="text-4xl font-extrabold text-white mb-1">850+</div>
-                <div className="text-xs font-bold uppercase tracking-widest text-indigo-300">Active Citizens</div>
-              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight mt-2">AI in q.where</h3>
+              <p className="text-base text-slate-600 font-semibold leading-snug">
+                Report. collected quality locations and promote complete teams.
+              </p>
             </div>
           </div>
 
