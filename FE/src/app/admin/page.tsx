@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<StatsItem | null>(null);
   const [changes, setChanges] = useState<ChangeItem[]>([]);
   const [staleAreas, setStaleAreas] = useState<StaleAreaItem[]>([]);
-  const [activeTab, setActiveTab] = useState<"priority" | "changes" | "stale" | "laporan">("priority");
+  const [activeTab, setActiveTab] = useState<"priority" | "changes" | "stale" | "laporan">("changes");
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotif, setShowNotif] = useState(false);
@@ -267,9 +267,9 @@ export default function AdminDashboardPage() {
           <div className="w-full lg:w-[500px] flex flex-col gap-4">
             <div className="flex gap-1 p-1 rounded-full bg-slate-100" style={{ backgroundColor: "var(--color-surface-container)" }}>
               {[
+                { key: "changes" as const, label: `Changes${changes.length ? ` (${changes.length})` : ""}`, icon: "swap_horiz" },
                 { key: "priority" as const, label: "Priority", icon: "trending_up" },
                 { key: "laporan" as const, label: `Reports${laporans.length ? ` (${laporans.length})` : ""}`, icon: "description" },
-                { key: "changes" as const, label: `Changes${changes.length ? ` (${changes.length})` : ""}`, icon: "swap_horiz" },
                 { key: "stale" as const, label: `Stale${staleAreas.length ? ` (${staleAreas.length})` : ""}`, icon: "schedule" },
               ].map(tab => (
                 <button
@@ -279,7 +279,7 @@ export default function AdminDashboardPage() {
                   style={activeTab === tab.key ? {
                     backgroundColor: "var(--color-primary)",
                     color: "var(--color-on-primary)",
-                    boxShadow: "0 2px 8px rgba(0,40,142,0.3)",
+                    boxShadow: "0 2px 8px rgba(137,217,39,0.3)",
                   } : {
                     color: "var(--color-on-surface-variant)",
                   }}

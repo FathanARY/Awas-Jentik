@@ -188,40 +188,6 @@ def _process_csv_rows(session: Session, valid_rows: list, filename: str) -> tupl
     return updated, categories_changed
 
 
-@router.post("/upload-csv", response_model=CsvUploadResponse)
-async def upload_csv(
-    file: UploadFile = File(...),
-    session: Session = Depends(get_session),
-    admin: User = Depends(get_current_admin),
-):
-    if not file.filename or not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="File harus berformat .csv")
-
-    content = (await file.read()).decode("utf-8")
-    rows = validate_csv_content(content)
-    valid_rows = [r for r in rows if r.valid]
-
-    updated, categories_changed = _process_csv_rows(session, valid_rows, file.filename or "unknown.csv")
-
-    log = CsvUploadLog(
-        filename=file.filename or "unknown.csv",
-        total_rows=len(rows),
-        rows_updated=updated,
-        rows_valid=len(valid_rows),
-        rows_invalid=len(rows) - len(valid_rows),
-        status="committed",
-    )
-    session.add(log)
-    session.commit()
-
-    return CsvUploadResponse(
-        status="committed",
-        total_rows=len(rows),
-        rows_updated=updated,
-        categories_changed=categories_changed,
-    )
-
-
 @router.post("/upload-csv/{upload_id}/confirm", response_model=CsvUploadResponse)
 async def confirm_csv(
     upload_id: str,
