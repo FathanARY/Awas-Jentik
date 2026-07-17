@@ -6,15 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { apiFetch } from "../api";
-
-interface AreaItem {
-  id: string;
-  name: string;
-  region: string;
-  score: number;
-  level: string;
-  reports: number;
-}
+import LiveCommunityMap from "@/components/LiveCommunityMap";
 
 interface StatsItem {
   total_laporan: number;
@@ -68,7 +60,6 @@ function getAreaStyle(score: number) {
 export default function AdminDashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
-  const [areas, setAreas] = useState<AreaItem[]>([]);
   const [stats, setStats] = useState<StatsItem | null>(null);
   const [changes, setChanges] = useState<ChangeItem[]>([]);
   const [staleAreas, setStaleAreas] = useState<StaleAreaItem[]>([]);
@@ -89,7 +80,6 @@ export default function AdminDashboardPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    apiFetch<AreaItem[]>("/areas").then(setAreas).catch(() => {});
     apiFetch<StatsItem>("/stats").then(setStats).catch(() => {});
     apiFetch<{ changes: ChangeItem[] }>("/changes").then(r => setChanges(r.changes)).catch(() => {});
     apiFetch<StaleAreaItem[]>("/areas/stale").then(setStaleAreas).catch(() => {});
@@ -222,104 +212,10 @@ export default function AdminDashboardPage() {
         }
       />
 
-      {/* Sidebar */}
-      <aside
-        className="fixed left-0 top-0 h-full flex flex-col py-8 px-4 w-64 z-40 border-r pt-24"
-        style={{
-          backgroundColor: "var(--color-surface-container-low)",
-          borderColor: "var(--color-outline-variant)",
-          color: "var(--color-primary)",
-        }}
-      >
-        <div className="mb-8 mt-12">
-          <h1
-            className="text-2xl font-extrabold mb-1"
-            style={{ color: "var(--color-primary)" }}
-          >
-            MalariaWatch
-          </h1>
-          <p
-            className="text-xs"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            Surveillance Unit
-          </p>
-        </div>
-        <nav className="flex-1 space-y-2">
-          <a
-            href="#"
-            onClick={(e) => { e.preventDefault(); setActiveTab("priority"); }}
-            className="flex items-center px-2 py-3 rounded-l-md font-bold border-r-4 transition-all"
-            style={{
-              color: "var(--color-primary)",
-              borderColor: "var(--color-primary)",
-              backgroundColor: "var(--color-surface-container-high)",
-            }}
-          >
-            <span className="material-symbols-outlined mr-4">dashboard</span>
-            <span className="text-sm">Dashboard</span>
-          </a>
-          <button
-            onClick={() => setActiveTab("laporan")}
-            className="w-full text-left flex items-center px-2 py-3 rounded-l-md transition-all"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-4">description</span>
-            <span className="text-sm">Reports</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("changes")}
-            className="w-full text-left flex items-center px-2 py-3 rounded-l-md transition-all"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-4">swap_horiz</span>
-            <span className="text-sm">Changes</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("stale")}
-            className="w-full text-left flex items-center px-2 py-3 rounded-l-md transition-all"
-            style={{ color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-4">schedule</span>
-            <span className="text-sm">Stale Areas</span>
-          </button>
-        </nav>
-        <div className="mt-auto pt-4 space-y-3">
-          <button
-            onClick={() => router.push("/lapor")}
-            className="w-full py-2 px-4 rounded-full text-sm font-bold shadow-md flex items-center justify-center transition-all active:scale-95"
-            style={{ backgroundColor: "var(--color-primary)", color: "var(--color-on-primary)" }}
-          >
-            <span className="material-symbols-outlined filled-icon mr-2">add</span>
-            Add New Report
-          </button>
-          <button
-            onClick={() => { logout(); router.push("/"); }}
-            className="w-full py-2 px-4 rounded-full text-sm font-medium border flex items-center justify-center transition-all active:scale-95"
-            style={{ borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}
-          >
-            <span className="material-symbols-outlined mr-2">logout</span>
-            Sign Out
-          </button>
-          <div
-            className="flex items-center p-2 rounded-lg shadow-sm"
-            style={{ backgroundColor: "var(--color-surface)" }}
-          >
-            <div className="w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: "var(--color-primary-container)", color: "var(--color-on-primary-container)" }}>
-              <span className="material-symbols-outlined">person</span>
-            </div>
-            <div>
-              <p className="text-sm font-bold" style={{ color: "var(--color-on-surface)" }}>{user?.username || "Admin"}</p>
-              <p className="text-xs" style={{ color: "var(--color-on-surface-variant)" }}>Administrator</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
       {/* Main Content */}
-      <main className="ml-64 pt-28 p-12 min-h-screen w-full">
+      <main className="pt-36 p-4 md:p-12 min-h-screen w-full max-w-[1600px] mx-auto">
         {stats && (
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-4 gap-4 mb-6 mt-4">
             {[
               { label: "Total Reports", value: stats.total_laporan, color: "var(--color-primary)", icon: "description" },
               { label: "Pending", value: stats.laporan_menunggu, color: "#f59e0b", icon: "pending_actions" },
@@ -340,109 +236,12 @@ export default function AdminDashboardPage() {
         )}
         <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-260px)]">
           {/* Map */}
-          <div
-            className="flex-1 rounded-xl shadow-sm border flex flex-col overflow-hidden relative group"
-            style={{
-              backgroundColor: "var(--color-surface)",
-              borderColor: "var(--color-surface-variant)",
-            }}
-          >
-            {/* Map Controls */}
-            <div className="absolute top-4 left-4 z-10 flex gap-2">
-              <button
-                className="px-4 py-2 rounded-full shadow-md text-sm font-medium border flex items-center transition-colors"
-                style={{
-                  backgroundColor: "var(--color-surface)",
-                  color: "var(--color-on-surface)",
-                  borderColor: "var(--color-outline-variant)",
-                }}
-              >
-                <span className="material-symbols-outlined mr-1 text-lg">layers</span>
-                Endemicity Data
-              </button>
-              <button
-                className="px-4 py-2 rounded-full shadow-md text-sm font-medium border flex items-center transition-colors opacity-70"
-                style={{
-                  backgroundColor: "var(--color-surface)",
-                  color: "var(--color-on-surface)",
-                  borderColor: "var(--color-outline-variant)",
-                }}
-              >
-                <span className="material-symbols-outlined mr-1 text-lg">sync_alt</span>
-                Migration Patterns
-              </button>
-            </div>
-
-            {/* Map Legend */}
-            <div
-              className="absolute bottom-4 right-4 z-10 p-2 rounded-lg shadow-md border"
-              style={{
-                backgroundColor: "var(--color-surface)",
-                borderColor: "var(--color-outline-variant)",
-              }}
-            >
-              <h4
-                className="text-xs font-semibold uppercase mb-1"
-                style={{ color: "var(--color-on-surface-variant)" }}
-              >
-                Risk Level
-              </h4>
-              <ul className="space-y-1">
-                {[
-                  { color: "var(--color-error)", label: "High" },
-                  { color: "#f59e0b", label: "Medium" },
-                  { color: "#10b981", label: "Low" },
-                ].map((r) => (
-                  <li key={r.label} className="flex items-center text-sm gap-2">
-                    <span
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: r.color }}
-                    />
-                    {r.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Map Image */}
-            <div
-              className="w-full h-full relative overflow-hidden"
-              style={{ backgroundColor: "var(--color-surface-container)" }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzFfW9tTwhBd4JY9enx8uWWmJd-rIHHjgw1QsQbdynUXZsXbz8uA-BOEwbxJyqPKMlZggyN73iFZLDeighkxbNFhVx-wiPyn5T0PKmJ1_Wb7UdpRya09Z6eR0zrs2zULzi_C-_Qbu_x0ocglzGDs7GVoqx5Dw6NwBW9RcFrybINL-5ObrtTI8rpW_YncCZug5-0ZkCoTYcf_orLVujaxFA0gyQSdhf6lwLu4JGig8vtObqOfe8Re9dAA"
-                alt="Map of Indonesia"
-                className="w-full h-full object-cover opacity-80"
-              />
-              {/* Markers */}
-              <div
-                className="absolute top-[30%] left-[40%] w-4 h-4 rounded-full animate-pulse"
-                style={{
-                  backgroundColor: "var(--color-error)",
-                  boxShadow: "0 0 10px rgba(186,26,26,0.8)",
-                }}
-              />
-              <div
-                className="absolute top-[45%] left-[60%] w-3 h-3 rounded-full"
-                style={{ backgroundColor: "#f59e0b" }}
-              />
-              <div
-                className="absolute top-[60%] left-[20%] w-3 h-3 rounded-full"
-                style={{ backgroundColor: "#10b981" }}
-              />
-              <div
-                className="absolute top-[25%] left-[70%] w-5 h-5 rounded-full animate-ping opacity-75"
-                style={{
-                  backgroundColor: "var(--color-error)",
-                  boxShadow: "0 0 15px rgba(186,26,26,0.9)",
-                }}
-              />
-            </div>
+          <div className="flex-1 bg-white p-6 rounded-2xl border shadow-sm flex flex-col" style={{ borderColor: "var(--color-outline-variant)" }}>
+            <LiveCommunityMap />
           </div>
 
           {/* Tabbed Panel */}
-          <div className="w-full lg:w-96 flex flex-col gap-4">
+          <div className="w-full lg:w-[500px] flex flex-col gap-4">
             <div className="flex gap-1 p-1 rounded-full bg-slate-100" style={{ backgroundColor: "var(--color-surface-container)" }}>
               {[
                 { key: "priority" as const, label: "Priority", icon: "trending_up" },
@@ -469,12 +268,19 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              {activeTab === "priority" && areas.map((area) => {
-                const style = getAreaStyle(area.score);
+              {activeTab === "priority" && (laporans.length === 0 ? (
+                <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>
+                  <span className="material-symbols-outlined text-3xl mb-2">trending_up</span>
+                  <p className="text-sm font-medium">No priority reports.</p>
+                </div>
+              ) : [...laporans].sort((a, b) => (b.risiko_gabungan ?? 0) - (a.risiko_gabungan ?? 0)).map((l) => {
+                const score = l.risiko_gabungan ?? 0;
+                const style = getAreaStyle(score);
                 return (
-                <div
-                  key={area.id}
-                  className="block p-4 rounded-xl shadow-sm border-l-4 border-y border-r"
+                <Link
+                  href={`/admin/laporan/${l.kode_laporan}`}
+                  key={l.kode_laporan}
+                  className="block p-4 rounded-xl shadow-sm border-l-4 border-y border-r hover:shadow-md transition-shadow cursor-pointer"
                   style={{
                     backgroundColor: "var(--color-surface)",
                     borderLeftColor: style.borderColor,
@@ -485,26 +291,26 @@ export default function AdminDashboardPage() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <h4 className="text-base font-bold" style={{ color: "var(--color-on-surface)" }}>{area.name}</h4>
-                      <p className="text-sm" style={{ color: "var(--color-on-surface-variant)" }}>{area.region}</p>
+                      <h4 className="text-base font-bold font-mono" style={{ color: "var(--color-on-surface)" }}>{l.kode_laporan}</h4>
+                      <p className="text-sm" style={{ color: "var(--color-on-surface-variant)" }}>{l.alamat || "—"}</p>
                     </div>
-                    <span className="px-2 py-1 rounded text-xs font-bold flex items-center" style={{ backgroundColor: style.chipBg, color: style.chipFg }}>
+                    <span className="px-2 py-1 rounded text-xs font-bold flex items-center capitalize" style={{ backgroundColor: style.chipBg, color: style.chipFg }}>
                       <span className="material-symbols-outlined text-sm mr-1">{style.icon}</span>
-                      {area.level}
+                      {l.heatmap_category || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between items-end mt-4">
                     <div>
                       <p className="text-xs mb-1" style={{ color: "var(--color-on-surface-variant)" }}>Risk Score</p>
-                      <p className="text-xl font-bold" style={{ color: style.scoreFg }}>{area.score}/100</p>
+                      <p className="text-xl font-bold" style={{ color: style.scoreFg }}>{score.toFixed(0)}/100</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs mb-1" style={{ color: "var(--color-on-surface-variant)" }}>New Reports</p>
-                      <p className="text-lg font-semibold" style={{ color: "var(--color-on-surface)" }}>{area.reports}</p>
+                      <p className="text-xs mb-1" style={{ color: "var(--color-on-surface-variant)" }}>Status</p>
+                      <p className={`text-sm font-semibold capitalize ${l.status === 'ditindaklanjuti' ? 'text-green-600' : l.status === 'terverifikasi' ? 'text-blue-600' : 'text-amber-600'}`}>{l.status}</p>
                     </div>
                   </div>
-                </div>
-              )})}
+                </Link>
+              )}))}
 
               {activeTab === "laporan" && (laporans.length === 0 ? (
                 <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>

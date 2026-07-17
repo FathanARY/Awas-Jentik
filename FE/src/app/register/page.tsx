@@ -66,9 +66,9 @@ export default function RegisterPage() {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 pointer-events-none material-symbols-outlined">
-                  mail
-                </span>
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <span className="material-symbols-outlined">mail</span>
+                </div>
                 <input
                   type="email"
                   required
@@ -83,9 +83,9 @@ export default function RegisterPage() {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Password</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 pointer-events-none material-symbols-outlined">
-                  lock
-                </span>
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                  <span className="material-symbols-outlined">lock</span>
+                </div>
                 <input
                   type="password"
                   required

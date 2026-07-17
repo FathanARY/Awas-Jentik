@@ -162,3 +162,10 @@ class StaleAreaItem(BaseModel):
     days_stale: int
     current_skor: Optional[float]
     current_kategori: Optional[str]
+
+
+class GridRiskResponse(BaseModel):
+    grid_id: str
+    skor: float
+    kategori: str
+

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { apiPostForm } from "../api";
 import VillageMapPicker, { type SelectedCell } from "./VillageMapPicker";
 import { cellToLatLng } from "@/components/MapGrid";
@@ -14,6 +14,8 @@ export default function LaporPage() {
   const [selectedGrid, setSelectedGrid] = useState<SelectedCell | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -234,18 +236,72 @@ export default function LaporPage() {
               Verification Photo <span className="text-xs font-bold px-2 py-1 bg-rose-100 text-rose-700 rounded-md uppercase tracking-wider ml-2">Required</span>
             </h3>
             
-            <label className="block w-full border-2 border-dashed border-blue-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer min-h-[240px] text-center transition-all group">
-              <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                <span className="material-symbols-outlined text-3xl">cloud_upload</span>
+            {photoFile ? (
+              /* ── Success state ── */
+              <div className="w-full border-2 border-emerald-200 bg-emerald-50/60 rounded-2xl p-10 flex flex-col items-center justify-center min-h-[240px] text-center">
+                {/* File + check SVG */}
+                <div className="flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-5">
+                  <svg width="52" height="52" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* File body */}
+                    <rect x="10" y="4" width="28" height="36" rx="4" fill="#a7f3d0" stroke="#059669" strokeWidth="2"/>
+                    {/* Fold corner */}
+                    <path d="M32 4 L38 10 L32 10 Z" fill="#6ee7b7" stroke="#059669" strokeWidth="1.5" strokeLinejoin="round"/>
+                    {/* Image icon lines */}
+                    <rect x="15" y="16" width="16" height="12" rx="2" fill="#6ee7b7" stroke="#059669" strokeWidth="1.5"/>
+                    <circle cx="18" cy="19" r="1.5" fill="#059669"/>
+                    <path d="M15 25 L19 21 L23 25" stroke="#059669" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 24 L24 21 L27 24" stroke="#059669" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    {/* Green badge with check */}
+                    <circle cx="40" cy="42" r="12" fill="#059669"/>
+                    <path d="M34 42 L38.5 46.5 L46.5 38" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                <p className="text-base font-extrabold text-slate-900 mb-1">Photo selected!</p>
+                <p className="text-sm text-slate-500 font-medium max-w-[240px] truncate mb-6">{photoFile}</p>
+
+                <button
+                  type="button"
+                  onClick={() => { setPhotoFile(null); setTimeout(() => photoInputRef.current?.click(), 50); }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 border-emerald-500 text-emerald-700 text-sm font-bold hover:bg-emerald-100 transition-all active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-base">photo_camera</span>
+                  Choose Another Photo
+                </button>
+
+                <input
+                  ref={photoInputRef}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  type="file"
+                  name="foto"
+                  onChange={(e) => setPhotoFile(e.target.files?.[0]?.name ?? null)}
+                />
               </div>
-              <p className="text-lg font-bold text-slate-900 mb-1">
-                Tap to capture or select photo
-              </p>
-              <p className="text-sm text-slate-500 font-medium">
-                Ensure the puddle is clearly visible along with its surrounding area.
-              </p>
-              <input accept="image/*" capture="environment" className="hidden" type="file" name="foto" />
-            </label>
+            ) : (
+              /* ── Default upload prompt ── */
+              <label className="block w-full border-2 border-dashed border-blue-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer min-h-[240px] text-center transition-all group">
+                <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                  <span className="material-symbols-outlined text-3xl">cloud_upload</span>
+                </div>
+                <p className="text-lg font-bold text-slate-900 mb-1">
+                  Tap to capture or select photo
+                </p>
+                <p className="text-sm text-slate-500 font-medium">
+                  Ensure the puddle is clearly visible along with its surrounding area.
+                </p>
+                <input
+                  ref={photoInputRef}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  type="file"
+                  name="foto"
+                  onChange={(e) => setPhotoFile(e.target.files?.[0]?.name ?? null)}
+                />
+              </label>
+            )}
           </section>
 
           {/* Submit */}

@@ -8,17 +8,14 @@ import {
   PUSKESMAS,
   SCHOOLS,
   MAP_DATA,
-  LAT_MAX,
-  LAT_MIN,
-  LNG_MIN,
-  LNG_MAX,
+  cellToLatLng,
 } from "@/components/MapGrid";
 
 interface HoveredCell {
   x: number;
   y: number;
   land: LandType;
-  reports: number;
+  risk: number;
 }
 
 
@@ -26,7 +23,7 @@ export default function LiveCommunityMap() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hovered, setHovered] = useState<HoveredCell | null>(null);
 
-  const [reportsData, setReportsData] = useState<number[][]>(() =>
+  const [riskData, setRiskData] = useState<number[][]>(() =>
     Array.from({ length: GRID }, () => Array(GRID).fill(0))
   );
   const [fetchError, setFetchError] = useState(false);
@@ -34,28 +31,33 @@ export default function LiveCommunityMap() {
   useEffect(() => {
     const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-    function fetchReports() {
-      fetch(`${API_BASE}/laporan?limit=200`, { cache: "no-store" })
+    function fetchRisks() {
+      fetch(`${API_BASE}/grids/risk`, { cache: "no-store" })
         .then((res) => {
           if (!res.ok) throw new Error("fetch failed");
           return res.json();
         })
-        .then((laporan: { lat: number | null; lng: number | null }[]) => {
+        .then((gridsRisk: { grid_id: string; skor: number; kategori: string }[]) => {
+          const lookup: Record<string, number> = {};
+          gridsRisk.forEach(g => { lookup[g.grid_id] = g.skor; });
+
           const data: number[][] = Array.from({ length: GRID }, () => Array(GRID).fill(0));
-          laporan.forEach((l) => {
-            if (l.lat == null || l.lng == null) return;
-            const col = Math.floor(((l.lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * GRID);
-            const row = Math.floor(((LAT_MAX - l.lat) / (LAT_MAX - LAT_MIN)) * GRID);
-            if (col < 0 || col >= GRID || row < 0 || row >= GRID) return;
-            data[row][col] = Math.min(15, data[row][col] + 1);
-          });
-          setReportsData(data);
+          for (let r = 0; r < GRID; r++) {
+            for (let c = 0; c < GRID; c++) {
+              const { lat, lng } = cellToLatLng(c, r);
+              const gx = Math.floor(Math.abs(lat) * 100) % 100;
+              const gy = Math.floor(Math.abs(lng) * 100) % 100;
+              const gridId = `AREA-${gx.toString().padStart(2, '0')}${gy.toString().padStart(2, '0')}`;
+              data[r][c] = lookup[gridId] || 0;
+            }
+          }
+          setRiskData(data);
         })
         .catch(() => setFetchError(true));
     }
 
-    fetchReports(); // fetch immediately on mount
-    const interval = setInterval(fetchReports, 5_000); // then every 30 seconds
+    fetchRisks(); // fetch immediately on mount
+    const interval = setInterval(fetchRisks, 5_000); // then every 5 seconds
     return () => clearInterval(interval); // cleanup on unmount
   }, []);
 
@@ -75,14 +77,14 @@ export default function LiveCommunityMap() {
         ctx.fillStyle = LAND_COLORS[MAP_DATA[r][c].land];
         ctx.fillRect(c * cellPx, r * cellPx, cellPx, cellPx);
 
-        const reports = reportsData[r][c];
-        if (reports > 0) {
+        const risk = riskData[r][c];
+        if (risk > 0) {
             let borderColor = "";
             let fillColor = "";
-            if (reports >= 10) { 
+            if (risk >= 75) { 
                 borderColor = "#dc2626"; 
                 fillColor = "rgba(220, 38, 38, 0.5)";
-            } else if (reports >= 6) { 
+            } else if (risk >= 50) { 
                 borderColor = "#f97316"; 
                 fillColor = "rgba(249, 115, 22, 0.4)";
             } else { 
@@ -116,7 +118,7 @@ export default function LiveCommunityMap() {
       ctx.fillStyle = "rgba(255,255,255,0.3)";
       ctx.fillRect(hc * cellPx, hr * cellPx, cellPx, cellPx);
     }
-  }, [hovered, reportsData]);
+  }, [hovered, riskData]);
 
   useEffect(() => { draw(); }, [draw]);
 
@@ -136,8 +138,8 @@ export default function LiveCommunityMap() {
       return;
     }
     const cell = MAP_DATA[row][col];
-    const reports = reportsData[row][col];
-    setHovered({ x: col + 1, y: row + 1, land: cell.land, reports });
+    const risk = riskData[row][col];
+    setHovered({ x: col + 1, y: row + 1, land: cell.land, risk });
   }
 
   return (
@@ -148,7 +150,7 @@ export default function LiveCommunityMap() {
           <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-xl">map</span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Live Community Map</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Live Risky Heat-Map</h2>
           <p className="text-slate-500 font-medium">Tracking hotspots in real-time.</p>
         </div>
         
@@ -164,12 +166,12 @@ export default function LiveCommunityMap() {
               <span className="capitalize text-slate-600">{hovered.land}</span>
             </div>
             <div className={`px-2.5 py-1.5 rounded-md text-[11px] uppercase tracking-widest font-bold w-fit ${
-              hovered.reports >= 10 ? 'bg-red-50 text-red-600 border border-red-100' : 
-              hovered.reports >= 6 ? 'bg-orange-50 text-orange-600 border border-orange-100' : 
-              hovered.reports > 0 ? 'bg-yellow-50 text-yellow-600 border border-yellow-100' : 
+              hovered.risk >= 75 ? 'bg-red-50 text-red-600 border border-red-100' : 
+              hovered.risk >= 50 ? 'bg-orange-50 text-orange-600 border border-orange-100' : 
+              hovered.risk > 0 ? 'bg-yellow-50 text-yellow-600 border border-yellow-100' : 
               'bg-slate-50 text-slate-500 border border-slate-100'
             }`}>
-              {hovered.reports} Reports
+              {hovered.risk > 0 ? `Risk: ${hovered.risk.toFixed(1)}` : 'No Data'}
             </div>
           </div>
         ) : (
@@ -181,7 +183,7 @@ export default function LiveCommunityMap() {
 
       <div className="flex flex-col gap-4">
         {/* Map Container - Full width without letterboxing */}
-        <div className="w-full rounded-2xl overflow-hidden border border-slate-200 relative bg-[#c0b8a8]">
+        <div className="w-full max-w-[400px] mx-auto rounded-2xl overflow-hidden border border-slate-200 relative bg-[#c0b8a8]">
           <canvas
             ref={canvasRef}
             className="w-full h-auto aspect-square cursor-crosshair block shadow-inner"
@@ -195,11 +197,11 @@ export default function LiveCommunityMap() {
         </div>
 
       {/* Legend Container Moved Outside */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 bg-white/50 backdrop-blur-sm border border-slate-200/80 px-4 py-3 rounded-xl shadow-sm text-xs font-medium text-slate-700 w-fit">
+      <div className="flex flex-wrap items-center justify-center mx-auto gap-x-6 gap-y-3 bg-white/50 backdrop-blur-sm border border-slate-200/80 px-4 py-3 rounded-xl shadow-sm text-xs font-medium text-slate-700 w-fit">
         <div className="text-slate-400 uppercase tracking-widest font-bold text-[10px]">Hotspots</div>
-        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#dc2626] bg-[#dc2626]/40" /> 10+ (Level 3)</div>
-        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#f97316] bg-[#f97316]/40" /> 6-9 (Level 2)</div>
-        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#eab308] bg-[#eab308]/40" /> 1-5 (Level 1)</div>
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#dc2626] bg-[#dc2626]/40" /> Tinggi (Risk ≥ 75)</div>
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#f97316] bg-[#f97316]/40" /> Sedang (Risk ≥ 50)</div>
+        <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#eab308] bg-[#eab308]/40" /> Rendah (Risk &lt; 50)</div>
       </div>
     </div>
     </div>
