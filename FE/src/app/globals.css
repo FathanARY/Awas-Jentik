@@ -1,123 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #89d927;
-  --color-primary-hover: #75c01f;
-  --color-primary-subtle: #eef8e3;
+  --color-primary: #00288e;
+  --color-primary-hover: #1e40af;
+  --color-primary-subtle: #e8edf8;
   --color-on-primary: #ffffff;
-  --color-primary-fixed: #dcf7c1;
-  --color-primary-fixed-dim: #b8e994;
-  --color-on-primary-fixed: #1a3300;
-  --color-on-primary-fixed-variant: #3d6600;
-  --color-primary-container: #b8e994;
-  --color-on-primary-container: #1a3300;
-  --color-inverse-primary: #5c8a1a;
+  --color-primary-fixed: #d2e0ff;
+  --color-primary-fixed-dim: #a4c1ff;
+  --color-on-primary-fixed: #001540;
+  --color-on-primary-fixed-variant: #003b9e;
+  --color-primary-container: #1e40af;
+  --color-on-primary-container: #ffffff;
 
-  --color-secondary: #ff9f0a;
+  --color-secondary: #2170e4;
   --color-on-secondary: #ffffff;
-  --color-secondary-container: #ffe6b3;
-  --color-on-secondary-container: #592d00;
-  --color-secondary-fixed: #ffe6b3;
-  --color-secondary-fixed-dim: #ffc966;
-  --color-on-secondary-fixed: #3d1f00;
-  --color-on-secondary-fixed-variant: #7a3f00;
+  --color-secondary-container: #d4e3ff;
+  --color-on-secondary-container: #001b3e;
+  --color-secondary-fixed: #d4e3ff;
+  --color-secondary-fixed-dim: #a8cbff;
+  --color-on-secondary-fixed: #00112a;
+  --color-on-secondary-fixed-variant: #004fa6;
 
-  --color-tertiary: #5e8a3c;
+  --color-tertiary: #872d00;
   --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #bff09e;
-  --color-on-tertiary-container: #1a2e00;
-  --color-tertiary-fixed: #bff09e;
-  --color-tertiary-fixed-dim: #96c979;
-  --color-on-tertiary-fixed: #0a1a00;
-  --color-on-tertiary-fixed-variant: #385a1a;
+  --color-tertiary-container: #ffdbcb;
+  --color-on-tertiary-container: #330e00;
+  --color-tertiary-fixed: #ffdbcb;
+  --color-tertiary-fixed-dim: #ffb798;
+  --color-on-tertiary-fixed: #200700;
+  --color-on-tertiary-fixed-variant: #6b2100;
 
-  --color-background: #f6f8f3;
-  --color-on-background: #1c1c1e;
+  --color-background: #f8f9ff;
+  --color-on-background: #1a1c1f;
 
-  --color-surface: #ffffff;
-  --color-on-surface: #1c1c1e;
-  --color-on-surface-variant: #6b6e64;
+  --color-surface: #f8f9ff;
+  --color-on-surface: #1a1c1f;
+  --color-on-surface-variant: #5c5e64;
 
   --color-surface-bright: #ffffff;
-  --color-surface-dim: #e2e5dd;
-  --color-surface-variant: #e8ebe2;
-  --color-surface-container: #eaede4;
-  --color-surface-container-low: #f0f2eb;
+  --color-surface-dim: #dde0e6;
+  --color-surface-variant: #e0e2ea;
+  --color-surface-container: #edeef5;
+  --color-surface-container-low: #f0f1f7;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-high: #e3e6dd;
-  --color-surface-container-highest: #dde0d7;
+  --color-surface-container-high: #e1e3ec;
+  --color-surface-container-highest: #dbdde6;
 
-  --color-error: #ff453a;
+  --color-error: #ba1a1a;
   --color-on-error: #ffffff;
-  --color-error-container: #ffe0dd;
-  --color-on-error-container: #93000a;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
 
-  --color-outline: #7c8075;
-  --color-outline-variant: #c6c9bf;
-  --color-surface-tint: #89d927;
-  --color-inverse-surface: #2d302a;
-  --color-inverse-on-surface: #f1f3ea;
+  --color-outline: #72747c;
+  --color-outline-variant: #c6c7d0;
+  --color-surface-tint: #00288e;
+  --color-inverse-surface: #2f3035;
+  --color-inverse-on-surface: #f0f1f7;
 }
 
 @theme inline {
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-subtle: var(--color-primary-subtle);
-  --color-on-primary: var(--color-on-primary);
-  --color-primary-fixed: var(--color-primary-fixed);
-  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
-  --color-on-primary-fixed: var(--color-on-primary-fixed);
-  --color-on-primary-fixed-variant: var(--color-on-primary-fixed-variant);
-  --color-primary-container: var(--color-primary-container);
-  --color-on-primary-container: var(--color-on-primary-container);
-  --color-inverse-primary: var(--color-inverse-primary);
-
-  --color-secondary: var(--color-secondary);
-  --color-on-secondary: var(--color-on-secondary);
-  --color-secondary-container: var(--color-secondary-container);
-  --color-on-secondary-container: var(--color-on-secondary-container);
-  --color-secondary-fixed: var(--color-secondary-fixed);
-  --color-secondary-fixed-dim: var(--color-secondary-fixed-dim);
-  --color-on-secondary-fixed: var(--color-on-secondary-fixed);
-  --color-on-secondary-fixed-variant: var(--color-on-secondary-fixed-variant);
-
-  --color-tertiary: var(--color-tertiary);
-  --color-on-tertiary: var(--color-on-tertiary);
-  --color-tertiary-container: var(--color-tertiary-container);
-  --color-on-tertiary-container: var(--color-on-tertiary-container);
-  --color-tertiary-fixed: var(--color-tertiary-fixed);
-  --color-tertiary-fixed-dim: var(--color-tertiary-fixed-dim);
-  --color-on-tertiary-fixed: var(--color-on-tertiary-fixed);
-  --color-on-tertiary-fixed-variant: var(--color-on-tertiary-fixed-variant);
-
-  --color-error: var(--color-error);
-  --color-on-error: var(--color-on-error);
-  --color-error-container: var(--color-error-container);
-  --color-on-error-container: var(--color-on-error-container);
-
-  --color-background: var(--color-background);
-  --color-on-background: var(--color-on-background);
-  --color-surface: var(--color-surface);
-  --color-on-surface: var(--color-on-surface);
-  --color-on-surface-variant: var(--color-on-surface-variant);
-  --color-surface-bright: var(--color-surface-bright);
-  --color-surface-dim: var(--color-surface-dim);
-  --color-surface-variant: var(--color-surface-variant);
-  --color-surface-container: var(--color-surface-container);
-  --color-surface-container-low: var(--color-surface-container-low);
-  --color-surface-container-lowest: var(--color-surface-container-lowest);
-  --color-surface-container-high: var(--color-surface-container-high);
-  --color-surface-container-highest: var(--color-surface-container-highest);
-
-  --color-outline: var(--color-outline);
-  --color-outline-variant: var(--color-outline-variant);
-  --color-surface-tint: var(--color-surface-tint);
-  --color-inverse-surface: var(--color-inverse-surface);
-  --color-inverse-on-surface: var(--color-inverse-on-surface);
-
-  --font-sans: 'Nunito', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 * {
@@ -131,7 +73,6 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);
-  font-family: var(--font-nunito), 'Nunito', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   min-height: 100dvh;
 }
 
@@ -244,51 +185,6 @@ h3 { font-size: 1.125rem; font-weight: 600; }
   border-radius: 20px;
 }
 
-/* Animations */
-
-/* Water Ripple — "Awas Jentik" signature */
-@keyframes rippleExpand {
-  0% { 
-    transform: scale(0.2); 
-    opacity: 0.5; 
-    border-width: 1.5px;
-  }
-  100% { 
-    transform: scale(3.5); 
-    opacity: 0; 
-    border-width: 0.3px;
-  }
-}
-
-@keyframes dropletFall {
-  0%, 100% { opacity: 0; transform: translateY(-12px) scale(0.8); }
-  15%, 85% { opacity: 0.6; transform: translateY(0) scale(1); }
-}
-
-.water-surface {
-  position: relative;
-}
-
-.water-surface::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .water-surface .ripple-ring {
-    animation: none;
-    opacity: 0.15;
-    transform: scale(1.8);
-  }
-  .water-surface .ripple-droplet {
-    animation: none;
-    opacity: 0.4;
-  }
-}
-
 @keyframes slideUpFade {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -299,12 +195,13 @@ h3 { font-size: 1.125rem; font-weight: 600; }
   50% { opacity: 0.5; }
 }
 
-.animate-enter {
-  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@keyframes ping {
+  0% { transform: scale(1); opacity: 1; }
+  75%, 100% { transform: scale(1.4); opacity: 0; }
 }
 
-.animate-blob {
-  animation: blob 7s infinite;
+.animate-enter {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-ping {
@@ -313,14 +210,6 @@ h3 { font-size: 1.125rem; font-weight: 600; }
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
 }
 
 .delay-100 { animation-delay: 100ms; }
