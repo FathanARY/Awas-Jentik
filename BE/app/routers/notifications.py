@@ -18,11 +18,23 @@ def trigger_notifikasi(session: Session, grid_id: str, kategori_lama: Optional[s
     if idx_baru <= idx_lama:
         return
 
-    message = f"[{sumber}] Risiko {grid_id} naik: {kategori_lama or 'Baru'} → {kategori_baru}"
+    rekomendasi = {
+        "Sangat Rendah": "Area ini saat ini berisiko rendah. Tetap pantau secara berkala.",
+        "Rendah": "Ada potensi breeding site. Pertimbangkan untuk menguras atau menutup genangan.",
+        "Sedang": "Risiko sedang terdeteksi. Hubungi kader kesehatan desa untuk tindak lanjut.",
+        "Tinggi": "RISIKO TINGGI. Segera laporkan ke Puskesmas dan hindari area genangan.",
+    }
+
+    naik_dari = f"dari {kategori_lama} " if kategori_lama else ""
+    message = (
+        f"Risiko area {grid_id} naik {naik_dari}ke {kategori_baru}. "
+        f"{rekomendasi.get(kategori_baru, '')} "
+        f"Sumber: {sumber}"
+    )
 
     notif = Notification(
         grid_id=grid_id,
-        message=message,
+        message=message.strip(),
         tipe="peringatan" if idx_baru >= 3 else "info",
         user_id=None,
     )

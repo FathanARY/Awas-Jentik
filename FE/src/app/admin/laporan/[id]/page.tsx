@@ -213,6 +213,9 @@ export default function AdminLaporanDetailPage() {
               <p className="text-sm mt-4" style={{ color: "var(--color-on-surface-variant)" }}>
                 {getWeightFormula()}. Kategori: {data.heatmap_category || "—"}.
               </p>
+              <p className="text-xs mt-3 italic" style={{ color: "var(--color-outline)" }}>
+                Skor prediktif — bukan status resmi Kemenkes
+              </p>
             </section>
           </div>
         </div>

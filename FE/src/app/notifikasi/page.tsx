@@ -70,7 +70,7 @@ export default function NotifikasiPage() {
 
         {loadingNotifs ? (
           <div className="flex justify-center py-12">
-            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-primary-fixed-dim border-t-primary rounded-full animate-spin"></div>
           </div>
         ) : notifications.length === 0 ? (
           <div className="text-center py-12 rounded-xl border bg-white" style={{ borderColor: "var(--color-outline-variant)" }}>
