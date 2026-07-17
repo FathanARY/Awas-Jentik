@@ -135,22 +135,42 @@ export default function RiwayatPage() {
 
                   {isExpanded && (
                     <div className="px-4 pb-4 border-t" style={{ borderColor: "var(--color-outline-variant)", backgroundColor: "var(--color-surface-container)" }}>
-                      <div className="pt-3 space-y-2">
+                      <div className="pt-3 space-y-3">
                         <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "var(--color-outline)" }}>AI Risk Breakdown</h4>
                         {[
-                          { label: "Habitat Score", value: l.habitat_risk_score, icon: "eco", weight: "0.65" },
-                          { label: "Mobility Score", value: l.mobility_risk_score, icon: "directions_walk", weight: "0.20" },
-                          { label: "Case Score", value: l.case_score, icon: "bug_report", weight: "0.15" },
-                        ].map(item => (
-                          <div key={item.label} className="flex items-center gap-2 text-sm">
-                            <span className="material-symbols-outlined text-sm" style={{ color: "var(--color-primary)" }}>{item.icon}</span>
-                            <span style={{ color: "var(--color-on-surface-variant)" }}>{item.label} (×{item.weight})</span>
-                            <span className="ml-auto font-bold" style={{ color: "var(--color-on-surface)" }}>{item.value?.toFixed(1) ?? "—"}</span>
+                          { label: "Habitat Score", value: l.habitat_risk_score, icon: "eco", weight: "0.65", color: "var(--color-primary)" },
+                          { label: "Mobility Score", value: l.mobility_risk_score, icon: "directions_walk", weight: "0.20", color: "var(--color-secondary)" },
+                          { label: "Case Score", value: l.case_score, icon: "bug_report", weight: "0.15", color: "var(--color-error)" },
+                        ].map(item => {
+                          const val = item.value ?? 0;
+                          const barWidth = Math.min(val, 100);
+                          return (
+                            <div key={item.label}>
+                              <div className="flex items-center gap-2 text-sm mb-1">
+                                <span className="material-symbols-outlined text-sm" style={{ color: item.color }}>{item.icon}</span>
+                                <span style={{ color: "var(--color-on-surface-variant)" }}>{item.label}</span>
+                                <span className="ml-auto font-bold" style={{ color: "var(--color-on-surface)" }}>{val.toFixed(0)}/100</span>
+                              </div>
+                              <div className="h-2 rounded-full w-full" style={{ backgroundColor: "var(--color-surface-container-highest)", overflow: "hidden" }}>
+                                <div
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${barWidth}%`,
+                                    backgroundColor: item.color,
+                                  }}
+                                />
+                              </div>
+                              <div className="text-right text-[10px] mt-0.5" style={{ color: "var(--color-outline)" }}>
+                                ×{item.weight}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div className="pt-2 mt-2 border-t border-outline-variant">
+                          <div className="flex items-center gap-2 text-sm font-bold text-on-surface">
+                            Risiko Gabungan
+                            <span className="ml-auto text-lg" style={{ color: colors.scoreFg }}>{score.toFixed(0)}/100</span>
                           </div>
-                        ))}
-                        <div className="pt-2 mt-2 border-t flex items-center gap-2 text-sm" style={{ borderColor: "var(--color-outline-variant)" }}>
-                          <span className="font-bold" style={{ color: "var(--color-on-surface)" }}>Risiko Gabungan</span>
-                          <span className="ml-auto font-bold text-lg" style={{ color: colors.scoreFg }}>{score.toFixed(0)}/100</span>
                         </div>
                       </div>
                     </div>
