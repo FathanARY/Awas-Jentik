@@ -1,59 +1,60 @@
 ---
-name: MalariaScan Redesign UI (Fresh & Friendly Concept)
-description: Redesign antarmuka deteksi nyamuk malaria menggunakan gaya visual yang fresh, bersih, dan approachable (mengadaptasi tracker kesehatan modern) agar tidak mengintimidasi pengguna.
-version: 1.0.0
+name: MalariaWatch Redesign UI (Fresh & Friendly Concept)
+description: Redesign antarmuka surveilans malaria menggunakan gaya visual yang fresh, bersih, dan approachable (mengadaptasi tracker kesehatan modern) agar tidak mengintimidasi pengguna.
+version: 2.0.0
 source: visual-audit
 mode: light
 default-mode: light
 style-direction: Minimalist Health-Tech + Soft Claymorphism
 mood: fresh, approachable, clean
 comparable-to: Apple Health, Noom
-screen-type: Dashboard, Detail, Camera Scanner
-target-platform: Google Apps Script Web App (HtmlService) — Tailwind v4 via CDN
+screen-type: Citizen Portal, Admin Dashboard, Report Form, Kader Dashboard
+target-platform: Next.js 16 (App Router) + Tailwind v4
 
 # ============================================
 # DESIGN TOKENS
-# Consumed by index.html via Tailwind v4 @theme directive (CSS custom properties).
+# Consumed by globals.css via Tailwind v4 @theme directive (CSS custom properties).
 # Format: hex codes lowercase, rem-based sizing for typography & spacing.
 # ============================================
 
 colors:
   # Brand
-  primary: "#89d927"             # purpose: main CTA, scanner active state, FAB
+  primary: "#89d927"             # purpose: main CTA, active state, primary actions
   primary-hover: "#75c01f"
   primary-subtle: "#eef8e3"      # ~10% feel — selected row, active tab bg
-  secondary: "#ff9f0a"           # supporting accent (e.g., medium risk highlight)
+  secondary: "#ff9f0a"           # supporting accent (medium risk, warnings)
   
   # Canvas
   background: "#f6f8f3"
-  surface: "#ffffff"             # card/panel
-  surface-2: "#fdfdfd"           # nested surface (modal, dropdown, popover)
-  surface-hover: "#f9f9f9"
+  surface: "#ffffff"
+  surface-container-lowest: "#ffffff"
+  surface-container-low: "#f0f2eb"
+  surface-container: "#eaede4"
+  surface-container-high: "#e3e6dd"
+  surface-container-highest: "#dde0d7"
+  surface-dim: "#e2e5dd"
+  surface-bright: "#ffffff"
+  surface-variant: "#e8ebe2"
   
   # Text
-  text-primary: "#1c1c1e"        # contrast vs background: 16.5:1 (WCAG AAA)
-  text-secondary: "#8e8e93"
-  text-muted: "#c7c7cc"
-  text-on-primary: "#ffffff"     # text on primary bg
+  on-background: "#1c1c1e"       # contrast vs background: 16.5:1 (WCAG AAA)
+  on-surface: "#1c1c1e"
+  on-surface-variant: "#6b6e64"
   
   # Lines
-  border: "#f2f2f7"
-  border-strong: "#e5e5ea"
+  outline: "#7c8075"
+  outline-variant: "#c6c9bf"
   
   # Semantic
-  success: "#34c759"
-  success-subtle: "#e8f8ec"
-  warning: "#ff9f0a"
-  warning-subtle: "#fff4e5"
-  error: "#ff453a"               # Use for 'Malaria Detected' high-risk
-  error-subtle: "#ffebe9"
-  info: "#32ade6"
-  info-subtle: "#e7f6fd"
+  error: "#ff453a"
+  error-container: "#ffe0dd"
+  on-error: "#ffffff"
+  on-error-container: "#93000a"
 
 typography:
-  font-family-display: "'Nunito', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif"
-  font-family-body: "'Nunito', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif"
-  font-family-mono: "ui-monospace, 'JetBrains Mono', monospace"
+  font-family-display: "Nunito"
+  font-family-body: "Nunito"
+  font-family-mono: "JetBrains Mono, ui-monospace, monospace"
   
   display:
     size: "2.5rem"            # 40px
@@ -74,17 +75,9 @@ typography:
     size: "1.125rem"          # 18px
     weight: 600
     line-height: 1.3
-  h4:
-    size: "1rem"              # 16px
-    weight: 600
-    line-height: 1.4
-  body-lg:
-    size: "1.125rem"          # 18px
-    weight: 400
-    line-height: 1.6
   body:
     size: "1rem"              # 16px
-    weight: 500             # medium weight for better readability on light bg
+    weight: 500
     line-height: 1.55
   body-sm:
     size: "0.875rem"          # 14px
@@ -127,7 +120,7 @@ radius:
   md: "0.75rem"                # 12px
   lg: "1rem"                   # 16px
   xl: "1.5rem"                 # 24px (Main cards)
-  "2xl": "2rem"                # 32px
+  2xl: "2rem"                  # 32px
   full: "9999px"
 
 shadow:
@@ -151,62 +144,51 @@ breakpoints:
   md: "768px"
   lg: "1024px"
   xl: "1280px"
-  "2xl": "1536px"
+  2xl: "1536px"
 
 layout:
-  max-content-width: "480px"   # Mobile-first web app feel
-  sidebar-width: "280px"
-  sidebar-collapsed-width: "80px"
-  topbar-height: "64px"
-  page-padding-x: "1.25rem"
-  page-padding-y: "1.5rem"
+  max-content-width: "1024px"  # Desktop max width
+  page-padding-x: "1.5rem"
+  page-padding-y: "2rem"
   card-padding: "1.5rem"
   section-gap: "2rem"
 
 # ============================================
 # COMPONENT BEHAVIOR SPECS
-# Resolved tokens — index.html generator pakai ini as authority.
 # ============================================
 components:
   button-primary:
     bg: "{colors.primary}"
-    text: "{colors.text-on-primary}"
-    padding: "1rem 2rem"
+    text: "{colors.on-primary}"
+    padding: "0.75rem 2rem"
     radius: "{radius.full}"
     weight: 700
-    font-size: "{typography.body.size}"
+    font-size: "0.875rem"
     hover-bg: "{colors.primary-hover}"
     focus-ring: "{shadow.focus}"
+    active: "scale(0.98)"
     disabled-opacity: 0.5
     
   button-secondary:
     bg: "{colors.surface}"
-    text: "{colors.text-primary}"
-    border: "1px solid {colors.border}"
-    padding: "1rem 2rem"
+    text: "{colors.on-surface}"
+    border: "1px solid {colors.outline}"
+    padding: "0.75rem 2rem"
     radius: "{radius.full}"
-    hover-bg: "{colors.surface-hover}"
-    
-  button-icon:
-    bg: "{colors.surface}"
-    border: "1px solid {colors.border}"
-    padding: "0.75rem"
-    radius: "{radius.full}"
-    hover-bg: "{colors.surface-hover}"
+    hover-bg: "{colors.surface-container-low}"
+    active: "scale(0.98)"
     
   input:
-    bg: "{colors.surface}"
-    text: "{colors.text-primary}"
-    placeholder: "{colors.text-muted}"
-    border: "1px solid {colors.border-strong}"
+    bg: "{colors.surface-container-low}"
+    text: "{colors.on-surface}"
+    border: "1px solid {colors.outline}"
     radius: "{radius.xl}"
-    padding: "1rem 1.25rem"
+    padding: "0.75rem 1rem"
     focus-border: "{colors.primary}"
-    focus-ring: "{shadow.focus}"
+    focus-ring: "0 0 0 4px rgba(137, 217, 39, 0.20)"
     
   card:
     bg: "{colors.surface}"
-    border: "none"
     shadow: "{shadow.md}"
     radius: "{radius.xl}"
     padding: "{layout.card-padding}"
@@ -214,7 +196,7 @@ components:
   badge:
     radius: "{radius.full}"
     padding: "0.25rem 0.75rem"
-    font-size: "{typography.caption.size}"
+    font-size: "0.7rem"
     weight: 600
     text-transform: "uppercase"
     letter-spacing: "0.05em"
@@ -224,61 +206,53 @@ components:
     radius: "{radius.lg}"
     padding: "1rem"
     shadow: "{shadow.sm}"
-    margin-bottom: "1rem"
-    hover-bg: "{colors.surface-hover}"
+    hover-bg: "{colors.surface-container-low}"
 
 ---
 
 # 📖 OVERVIEW
-Desain ini mengubah aplikasi deteksi nyamuk malaria yang biasanya terasa klinis/medis menjadi pengalaman yang bersih, modern, dan sangat ramah pengguna. Mengadaptasi pola desain aplikasi *health & lifestyle tracker*, antarmuka menggunakan *soft claymorphism* dengan sudut-sudut membulat yang bersahabat dan warna hijau yang segar, memastikan pengguna awam merasa aman dan mudah saat melakukan pemindaian (scanning).
+Desain ini mengubah aplikasi surveilans malaria yang biasanya terasa klinis/medis menjadi pengalaman yang bersih, modern, dan sangat ramah pengguna. Mengadaptasi pola desain aplikasi health & lifestyle tracker, antarmuka menggunakan soft claymorphism dengan sudut-sudut membulat yang bersahabat dan warna hijau yang segar.
 
 # 🎨 COLORS PHILOSOPHY
-**Primary (`#89d927`)** — Hijau cerah (lime/yellow-green) yang memberikan kesan sehat, organik, dan positif. Digunakan untuk tombol utama (seperti FAB Scanner) dan status "Aman".
+**Primary (`#89d927`)** — Hijau cerah (lime/yellow-green) yang memberikan kesan sehat, organik, dan positif. Digunakan untuk tombol utama dan status risiko rendah.
 
-**Canvas** — Latar belakang menggunakan `#f6f8f3` (off-white dengan tint hijau) agar *card* putih murni (`#ffffff`) dapat menonjol (elevated) melalui *soft shadow* tanpa perlu garis batas (*border*) yang kaku.
+**Secondary (`#ff9f0a`)** — Oranye hangat untuk aksen pendukung, peringatan, dan risiko menengah.
 
-**Semantic colors** — Sangat penting untuk fitur deteksi. Gunakan `#ff453a` (Error Red) **hanya** untuk mengindikasikan deteksi nyamuk berbahaya (Anopheles).
+**Canvas** — Latar belakang menggunakan `#f6f8f3` (off-white dengan tint hijau) agar card putih (`#ffffff`) dapat menonjol melalui soft shadow tanpa perlu border yang kaku.
+
+**Semantic colors** — `#ff453a` (Error Red) digunakan hanya untuk indikasi risiko tinggi dan malaria terdeteksi.
 
 # 🔤 TYPOGRAPHY PHILOSOPHY
-**Font choice:** `Nunito` atau `Plus Jakarta Sans`. Mengutamakan *geometric rounded sans* agar selaras dengan bentuk komponen UI yang bulat (*pillowy*). Ini mengurangi kesan kaku pada aplikasi teknologi kesehatan.
+**Font choice:** `Nunito`. Geometric rounded sans yang selaras dengan bentuk komponen UI yang bulat (pillowy). Ini mengurangi kesan kaku pada aplikasi teknologi kesehatan.
 
 **Hierarchy rules:**
-- H1 tebal (Weight 700/800) untuk *greeting* atau nilai numerik penting (misal: "Hasil Scan").
-- Gunakan `tabular-nums` pada area persentase akurasi AI.
+- H1 tebal (Weight 700/800) untuk greeting atau nilai numerik penting.
+- Gunakan `tabular-nums` pada area skor risiko dan data numerik.
+- Body text weight 500 untuk keterbacaan optimal di latar terang.
 
 # 📐 SPACING & LAYOUT PHILOSOPHY
 **Base grid:** 8px.
-**Max content width:** Dibatasi di 480px untuk web app karena penggunaan pemindai kamera (scanner) paling optimal pada *form factor mobile*. Di layar *desktop*, layout akan terpusat (centered) menyerupai tampilan *smartphone*.
-**Whitespace:** *Generous*. Berikan ruang bernapas yang besar antar *card* (section gap 2rem/32px) agar informasi hasil analisis AI mudah dicerna.
+**Max content width:** 1024px untuk halaman utama (5xl).
+**Whitespace:** Generous. Berikan ruang bernapas yang besar antar card (section gap 2rem/32px).
 
 # 🟦 SHAPE & RADIUS PHILOSOPHY
 **Sangat Membulat (Pillowy).** 
-- *Card* utama menggunakan radius `xl` (24px).
-- *Button*, Ikon aksi, dan *Tags* wajib menggunakan radius `full` (pill shape). 
-- Tidak ada sudut tajam (0px) pada elemen interaktif manapun.
+- Card utama menggunakan radius `xl` (24px) atau `2xl` (32px).
+- Button, ikon aksi, dan badge wajib menggunakan radius `full` (pill shape). 
+- Tidak ada sudut tajam pada elemen interaktif.
 
 # 🌫️ ELEVATION PHILOSOPHY
 **Strategy:** Soft shadow / Tonal.
-Alih-alih menggunakan border untuk memisahkan *card*, desain ini mengandalkan `shadow.md` (`0 8px 24px rgba(0, 0, 0, 0.06)`) untuk memberikan kesan melayang yang lembut (*claymorphism* halus). 
-
-# 🧩 COMPONENT BEHAVIOR RULES
-**Camera/Scanner Area:** Overlay pemindai harus memiliki batas (*bounding box*) dengan sudut membulat, dan area di luar kotak fokus digelapkan dengan *backdrop* tembus pandang (`rgba(0,0,0,0.4)`).
-**FAB (Floating Action Button):** Tombol utama untuk "Scan Nyamuk" diletakkan mengambang di tengah bawah layar (dikemas dalam *dock* navigation) untuk jangkauan ibu jari yang ergonomis.
-**List Data:** Riwayat scan ditampilkan berjejer secara vertikal dengan bentuk *card* membulat yang memiliki ikon, teks utama (spesies nyamuk), dan *badge* status di sebelah kanan.
+Alih-alih menggunakan border untuk memisahkan card, desain ini mengandalkan shadow ringan untuk memberikan kesan melayang yang lembut.
 
 # 🚫 RULES TO NEVER BREAK
-- Never gunakan *sharp corners* (radius < 8px) pada elemen UI utama.
-- Never gunakan *hard drop shadows* dengan *opacity* tinggi (warna hitam pekat).
-- Never campurkan border garis keras jika elemen sudah menggunakan *shadow*.
-- Never buat *layout* melebar (full width) di desktop; pertahankan porsi maksimal 480px di tengah layar.
+- Never gunakan sharp corners (radius < 8px) pada elemen UI utama.
+- Never gunakan hard drop shadows dengan opacity tinggi (warna hitam pekat).
+- Never campurkan border garis keras jika elemen sudah menggunakan shadow.
+- Never gunakan warna biru sebagai primary — ini adalah brand hijau (malaria prevention).
 
 # ✅ RULES TO ALWAYS FOLLOW
-- Gunakan ikon dengan gaya *outline* tebal dan ujung membulat (*rounded terminals*).
-- Pertahankan kontras warna teks (minimal abu-abu gelap `#8e8e93`) agar tetap terbaca pada latar belakang terang.
-- Berikan efek *scale up* atau *springy bounce* kecil (`easing-emphasized`) saat tombol atau *card* di-klik.
-
-# 🔧 GAS INTEGRATION NOTES
-- File ini di-consume oleh `index.html` (Tailwind v4 CDN) via `@theme` directive di inline `<style>`.
-- Pastikan memuat Google Font `Nunito` atau `Plus Jakarta Sans` di bagian `<head>`.
-- Batasi *layout* menggunakan `max-w-[480px] mx-auto` pada kontainer utama.
-- Fitur kamera di GAS memerlukan API `navigator.mediaDevices.getUserMedia`; pastikan *environment* melayani akses HTTPS agar izin kamera (webcam/kamera HP) diizinkan oleh *browser*.
+- Gunakan ikon Material Symbols dengan gaya outline tebal dan ujung membulat.
+- Pertahankan kontras warna teks (minimal `on-surface-variant`) agar tetap terbaca.
+- Berikan efek scale up atau springy bounce kecil saat elemen interaktif di-klik.
+- Gunakan Bahasa Indonesia untuk semua teks UI.

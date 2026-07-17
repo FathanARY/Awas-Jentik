@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Nunito } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "MalariaWatch — Malaria Surveillance System",
+  title: "MalariaWatch — Sistem Surveilans Malaria",
   description:
-    "Participatory surveillance system for early detection of malaria mosquito breeding sites based on citizen crowdsourcing.",
+    "Sistem deteksi dini partisipatif untuk pencegahan penyebaran malaria berbasis crowdsourcing warga.",
 };
 
 export default function RootLayout({
@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="id" className={`${nunito.variable} h-full antialiased`}>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
