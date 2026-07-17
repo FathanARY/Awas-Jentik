@@ -43,25 +43,35 @@ async def list_areas():
 
 @router.get("/grids/risk", response_model=list[GridRiskResponse])
 async def get_grids_risk(session: Session = Depends(get_session)):
+    risk_map: dict[str, float] = {}
+
     all_grids = session.exec(
         select(RiwayatRisiko.grid_id).distinct()
     ).all()
-
-    result = []
     for grid_id in all_grids:
         terakhir = session.exec(
             select(RiwayatRisiko)
             .where(RiwayatRisiko.grid_id == grid_id)
             .order_by(RiwayatRisiko.timestamp.desc())
         ).first()
-
         if terakhir:
-            result.append(GridRiskResponse(
-                grid_id=grid_id,
-                skor=terakhir.skor,
-                kategori=terakhir.kategori,
-            ))
+            risk_map[grid_id] = terakhir.skor
 
+    laporans = session.exec(
+        select(Laporan).where(Laporan.lat != None, Laporan.lng != None, Laporan.risiko_gabungan != None)
+    ).all()
+    for l in laporans:
+        if l.lat and l.lng:
+            gx = int(abs(l.lat) * 100) % 100
+            gy = int(abs(l.lng) * 100) % 100
+            gid = f"AREA-{gx:02d}{gy:02d}"
+            if gid not in risk_map:
+                risk_map[gid] = l.risiko_gabungan or 0
+
+    result = []
+    for gid, skor in risk_map.items():
+        from app.services.smoothing import skor_ke_kategori
+        result.append(GridRiskResponse(grid_id=gid, skor=skor, kategori=skor_ke_kategori(skor)))
     return result
 
 
