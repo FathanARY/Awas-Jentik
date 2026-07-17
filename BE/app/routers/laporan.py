@@ -14,6 +14,7 @@ from app.models.user import User
 from app.services.auth import get_current_kader
 from app.schemas import LaporRequest, LaporanResponse, LaporanDetailResponse, TindakanRequest
 from app.services import predict_risk, reverse_geocode
+from app.services.grid_distances import estimate_distances
 from app.services.smoothing import (
     ema_smooth, skor_ke_kategori, kategori_naik, batasi_lompatan,
     simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
@@ -40,14 +41,14 @@ async def submit_laporan(
     air_tenang: str = Form(...),
     paparan_matahari: str = Form(...),
     luas_genangan_m2: float = Form(...),
-    curah_hujan_30_hari_mm: float = Form(...),
-    jarak_hutan_m: float = Form(...),
-    jarak_sawah_m: float = Form(...),
-    jarak_sungai_m: float = Form(...),
-    jarak_rawa_m: float = Form(...),
-    jarak_tambang_m: float = Form(...),
-    jarak_permukiman_m: float = Form(...),
-    jarak_puskesmas_m: float = Form(...),
+    curah_hujan_30_hari_mm: Optional[float] = Form(None),
+    jarak_hutan_m: Optional[float] = Form(None),
+    jarak_sawah_m: Optional[float] = Form(None),
+    jarak_sungai_m: Optional[float] = Form(None),
+    jarak_rawa_m: Optional[float] = Form(None),
+    jarak_tambang_m: Optional[float] = Form(None),
+    jarak_permukiman_m: Optional[float] = Form(None),
+    jarak_puskesmas_m: Optional[float] = Form(None),
     pendatang_30_hari: int = Form(...),
     pendatang_dari_endemis: int = Form(...),
     pekerja_mobil: int = Form(...),
@@ -55,23 +56,37 @@ async def submit_laporan(
     kasus_malaria_1km_30hari: int = Form(default=0),
     lat: Optional[float] = Form(None),
     lng: Optional[float] = Form(None),
+    grid_x: Optional[int] = Form(None),
+    grid_y: Optional[int] = Form(None),
+    grid_land: Optional[str] = Form(None),
     foto: Optional[UploadFile] = File(None),
     session: Session = Depends(get_session),
 ):
+    estimated = estimate_distances(grid_land)
+
+    _curah_hujan = curah_hujan_30_hari_mm if curah_hujan_30_hari_mm is not None else estimated.get("curah_hujan_30_hari_mm", 250)
+    _jarak_hutan = jarak_hutan_m if jarak_hutan_m is not None else estimated.get("jarak_hutan_m", 2000)
+    _jarak_sawah = jarak_sawah_m if jarak_sawah_m is not None else estimated.get("jarak_sawah_m", 2000)
+    _jarak_sungai = jarak_sungai_m if jarak_sungai_m is not None else estimated.get("jarak_sungai_m", 2000)
+    _jarak_rawa = jarak_rawa_m if jarak_rawa_m is not None else estimated.get("jarak_rawa_m", 2000)
+    _jarak_tambang = jarak_tambang_m if jarak_tambang_m is not None else estimated.get("jarak_tambang_m", 5000)
+    _jarak_permukiman = jarak_permukiman_m if jarak_permukiman_m is not None else estimated.get("jarak_permukiman_m", 200)
+    _jarak_puskesmas = jarak_puskesmas_m if jarak_puskesmas_m is not None else estimated.get("jarak_puskesmas_m", 2000)
+
     habitat_input = {
         "Persentase_Lumut": persentase_lumut,
         "Persentase_Vegetasi": persentase_vegetasi,
         "Air_Tenang": air_tenang,
         "Paparan_Matahari": paparan_matahari,
         "Luas_Genangan_m2": luas_genangan_m2,
-        "Curah_Hujan_30_Hari_mm": curah_hujan_30_hari_mm,
-        "Jarak_Hutan_m": jarak_hutan_m,
-        "Jarak_Sawah_m": jarak_sawah_m,
-        "Jarak_Sungai_m": jarak_sungai_m,
-        "Jarak_Rawa_m": jarak_rawa_m,
-        "Jarak_Tambang_m": jarak_tambang_m,
-        "Jarak_Permukiman_m": jarak_permukiman_m,
-        "Jarak_Puskesmas_m": jarak_puskesmas_m,
+        "Curah_Hujan_30_Hari_mm": _curah_hujan,
+        "Jarak_Hutan_m": _jarak_hutan,
+        "Jarak_Sawah_m": _jarak_sawah,
+        "Jarak_Sungai_m": _jarak_sungai,
+        "Jarak_Rawa_m": _jarak_rawa,
+        "Jarak_Tambang_m": _jarak_tambang,
+        "Jarak_Permukiman_m": _jarak_permukiman,
+        "Jarak_Puskesmas_m": _jarak_puskesmas,
     }
     mobility_input = {
         "Pendatang_30_Hari": pendatang_30_hari,
@@ -160,14 +175,14 @@ async def submit_laporan(
         air_tenang=air_tenang,
         paparan_matahari=paparan_matahari,
         luas_genangan_m2=luas_genangan_m2,
-        curah_hujan_30_hari_mm=curah_hujan_30_hari_mm,
-        jarak_hutan_m=jarak_hutan_m,
-        jarak_sawah_m=jarak_sawah_m,
-        jarak_sungai_m=jarak_sungai_m,
-        jarak_rawa_m=jarak_rawa_m,
-        jarak_tambang_m=jarak_tambang_m,
-        jarak_permukiman_m=jarak_permukiman_m,
-        jarak_puskesmas_m=jarak_puskesmas_m,
+        curah_hujan_30_hari_mm=_curah_hujan,
+        jarak_hutan_m=_jarak_hutan,
+        jarak_sawah_m=_jarak_sawah,
+        jarak_sungai_m=_jarak_sungai,
+        jarak_rawa_m=_jarak_rawa,
+        jarak_tambang_m=_jarak_tambang,
+        jarak_permukiman_m=_jarak_permukiman,
+        jarak_puskesmas_m=_jarak_puskesmas,
         pendatang_30_hari=pendatang_30_hari,
         pendatang_dari_endemis=pendatang_dari_endemis,
         pekerja_mobil=pekerja_mobil,

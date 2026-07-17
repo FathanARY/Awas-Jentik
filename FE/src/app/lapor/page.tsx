@@ -41,14 +41,6 @@ export default function LaporPage() {
     fd.set("air_tenang", airMap[airVal] || "Tidak");
     fd.set("paparan_matahari", paparanMap[paparanVal] || "Sedang");
 
-    fd.append("curah_hujan_30_hari_mm", "300");
-    fd.append("jarak_hutan_m", "100");
-    fd.append("jarak_sawah_m", "500");
-    fd.append("jarak_sungai_m", "400");
-    fd.append("jarak_rawa_m", "1000");
-    fd.append("jarak_tambang_m", "3000");
-    fd.append("jarak_permukiman_m", "200");
-    fd.append("jarak_puskesmas_m", "2000");
     fd.append("pendatang_30_hari", "3");
     fd.append("pendatang_dari_endemis", "1");
     fd.append("pekerja_mobil", "2");
