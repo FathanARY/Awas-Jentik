@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
   const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!loading && (!user || user.user_metadata?.role !== "admin")) {
+    if (!loading && (!user || user.role !== "admin")) {
       router.push("/");
     }
   }, [user, loading, router]);
