@@ -13,4 +13,4 @@ RUN mkdir -p uploads
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "python -u seed.py 2>&1; echo '--- Starting uvicorn ---'; uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
