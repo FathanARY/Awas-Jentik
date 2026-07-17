@@ -1,6 +1,7 @@
 import csv
 import datetime
 import io
+import uuid
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
 from sqlmodel import Session, select
 from typing import Optional
@@ -16,11 +17,13 @@ from app.services.smoothing import (
 )
 from app.routers.notifications import trigger_notifikasi
 from app.schemas import (
-    CsvPreviewRow, CsvPreviewResponse, CsvUploadResponse,
+    CsvPreviewRow, CsvPreviewResponse, CsvStagedResponse, CsvUploadResponse,
     ChangeItem, ChangesResponse, StaleAreaItem,
 )
 
 router = APIRouter(prefix="/api", tags=["pcem"])
+
+_staging_store: dict[str, dict] = {}
 
 CSV_COLUMNS = [
     "Grid_ID", "Periode_Akhir", "Pendatang_30_Hari",
@@ -81,7 +84,7 @@ def validate_csv_content(content: str) -> list[CsvPreviewRow]:
     return rows
 
 
-@router.post("/upload-csv/preview", response_model=CsvPreviewResponse)
+@router.post("/upload-csv/preview", response_model=CsvStagedResponse)
 async def preview_csv(
     file: UploadFile = File(...),
     admin: User = Depends(get_current_admin),
@@ -94,12 +97,18 @@ async def preview_csv(
     valid = sum(1 for r in rows if r.valid)
     invalid = len(rows) - valid
 
-    changes = 0
-    for r in rows:
-        if r.valid:
-            changes += 1
+    changes = sum(1 for r in rows if r.valid)
 
-    return CsvPreviewResponse(
+    upload_id = uuid.uuid4().hex[:12]
+    _staging_store[upload_id] = {
+        "valid_rows": [r for r in rows if r.valid],
+        "all_rows": rows,
+        "filename": file.filename,
+        "total": len(rows),
+    }
+
+    return CsvStagedResponse(
+        upload_id=upload_id,
         total_rows=len(rows),
         valid_rows=valid,
         invalid_rows=invalid,
@@ -108,19 +117,7 @@ async def preview_csv(
     )
 
 
-@router.post("/upload-csv", response_model=CsvUploadResponse)
-async def upload_csv(
-    file: UploadFile = File(...),
-    session: Session = Depends(get_session),
-    admin: User = Depends(get_current_admin),
-):
-    if not file.filename or not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="File harus berformat .csv")
-
-    content = (await file.read()).decode("utf-8")
-    rows = validate_csv_content(content)
-    valid_rows = [r for r in rows if r.valid]
-
+def _process_csv_rows(session: Session, valid_rows: list, filename: str) -> tuple[int, int]:
     categories_changed = 0
     updated = 0
 
@@ -179,14 +176,32 @@ async def upload_csv(
         kategori_final = batasi_lompatan(kategori_lama, kategori_raw, cluster)
 
         simpan_riwayat(session, row.grid_id, skor_smoothed, kategori_final,
-                       sumber=f"CSV: {file.filename}",
-                       detail=f"n_laporan={n}, alpha={hitung_n_laporan.__globals__['hitung_alpha'](n) if False else max(0.1, 1.0/(n+1)):.3f}")
+                       sumber=f"CSV: {filename}",
+                       detail=f"n_laporan={n}")
 
         if kategori_naik(kategori_lama, kategori_final):
             categories_changed += 1
-            trigger_notifikasi(session, row.grid_id, kategori_lama, kategori_final, f"CSV: {file.filename}")
+            trigger_notifikasi(session, row.grid_id, kategori_lama, kategori_final, f"CSV: {filename}")
 
         updated += 1
+
+    return updated, categories_changed
+
+
+@router.post("/upload-csv", response_model=CsvUploadResponse)
+async def upload_csv(
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin),
+):
+    if not file.filename or not file.filename.endswith(".csv"):
+        raise HTTPException(status_code=400, detail="File harus berformat .csv")
+
+    content = (await file.read()).decode("utf-8")
+    rows = validate_csv_content(content)
+    valid_rows = [r for r in rows if r.valid]
+
+    updated, categories_changed = _process_csv_rows(session, valid_rows, file.filename or "unknown.csv")
 
     log = CsvUploadLog(
         filename=file.filename or "unknown.csv",
@@ -205,6 +220,53 @@ async def upload_csv(
         rows_updated=updated,
         categories_changed=categories_changed,
     )
+
+
+@router.post("/upload-csv/{upload_id}/confirm", response_model=CsvUploadResponse)
+async def confirm_csv(
+    upload_id: str,
+    session: Session = Depends(get_session),
+    admin: User = Depends(get_current_admin),
+):
+    staged = _staging_store.pop(upload_id, None)
+    if not staged:
+        raise HTTPException(status_code=404, detail="Upload ID tidak ditemukan atau sudah kadaluarsa")
+
+    valid_rows = staged["valid_rows"]
+    all_rows = staged["all_rows"]
+    filename = staged["filename"] or "unknown.csv"
+
+    updated, categories_changed = _process_csv_rows(session, valid_rows, filename)
+
+    log = CsvUploadLog(
+        filename=filename,
+        total_rows=staged["total"],
+        rows_updated=updated,
+        rows_valid=len(valid_rows),
+        rows_invalid=len(all_rows) - len(valid_rows),
+        status="committed",
+    )
+    session.add(log)
+    session.commit()
+
+    return CsvUploadResponse(
+        status="committed",
+        total_rows=staged["total"],
+        rows_updated=updated,
+        categories_changed=categories_changed,
+    )
+
+
+@router.post("/upload-csv/{upload_id}/cancel")
+async def cancel_csv(
+    upload_id: str,
+    admin: User = Depends(get_current_admin),
+):
+    if upload_id in _staging_store:
+        del _staging_store[upload_id]
+        return {"status": "cancelled", "upload_id": upload_id}
+    raise HTTPException(status_code=404, detail="Upload ID tidak ditemukan atau sudah kadaluarsa")
+
 
 
 @router.get("/changes", response_model=ChangesResponse)

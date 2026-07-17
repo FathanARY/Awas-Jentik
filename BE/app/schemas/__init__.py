@@ -169,3 +169,28 @@ class GridRiskResponse(BaseModel):
     skor: float
     kategori: str
 
+
+class MobilitasInput(BaseModel):
+    pendatang_30_hari: int = Field(ge=0)
+    pendatang_dari_endemis: int = Field(ge=0)
+    pekerja_mobil: int = Field(ge=0)
+    riwayat_perjalanan_endemis: int = Field(ge=0)
+
+
+class MobilitasResponse(BaseModel):
+    grid_id: str
+    pendatang_30_hari: int
+    pendatang_dari_endemis: int
+    pekerja_mobil: int
+    riwayat_perjalanan_endemis: int
+    mobility_risk_score: Optional[float] = None
+    habitat_risk_score: Optional[float] = None
+    case_score: Optional[float] = None
+    risiko_gabungan: Optional[float] = None
+    kategori: Optional[str] = None
+    updated_at: datetime
+
+
+class CsvStagedResponse(CsvPreviewResponse):
+    upload_id: str
+

@@ -13,7 +13,7 @@ from app.services.auth import get_current_kader
 from app.schemas import LaporRequest, LaporanResponse, LaporanDetailResponse, TindakanRequest
 from app.services import predict_risk, reverse_geocode
 from app.services.smoothing import (
-    ema_smooth, skor_ke_kategori, batasi_lompatan,
+    ema_smooth, skor_ke_kategori, kategori_naik, batasi_lompatan,
     simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
 )
 from app.routers.notifications import trigger_notifikasi
@@ -98,8 +98,37 @@ async def submit_laporan(
         gy = int(abs(lng) * 100) % 100
         grid_id = f"AREA-{gx:02d}{gy:02d}"
 
+    kode_laporan = generate_kode()
+
+    if grid_id:
+        riwayat_terakhir = session.exec(
+            select(RiwayatRisiko)
+            .where(RiwayatRisiko.grid_id == grid_id)
+            .order_by(RiwayatRisiko.timestamp.desc())
+        ).first()
+
+        skor_lama = riwayat_terakhir.skor if riwayat_terakhir else None
+        kategori_lama = riwayat_terakhir.kategori if riwayat_terakhir else None
+
+        n = hitung_n_laporan(session, grid_id)
+        skor_smoothed = ema_smooth(risk["risiko_gabungan"], skor_lama, n)
+        kategori_raw = skor_ke_kategori(skor_smoothed)
+        cluster = cek_cluster_darurat(session, grid_id)
+        kategori_final = batasi_lompatan(kategori_lama, kategori_raw, cluster)
+
+        simpan_riwayat(
+            session, grid_id, skor_smoothed, kategori_final,
+            sumber=f"Laporan Warga: {kode_laporan}",
+            detail=f"n_laporan={n}",
+        )
+
+        if kategori_naik(kategori_lama, kategori_final):
+            trigger_notifikasi(session, grid_id, kategori_lama, kategori_final, f"Laporan Warga: {kode_laporan}")
+
+        risk["heatmap_category"] = kategori_final
+
     laporan = Laporan(
-        kode_laporan=generate_kode(),
+        kode_laporan=kode_laporan,
         status="menunggu",
         lat=lat,
         lng=lng,
