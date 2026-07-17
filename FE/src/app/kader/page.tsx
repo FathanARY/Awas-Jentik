@@ -186,7 +186,7 @@ export default function KaderDashboardPage() {
                   const style = getAreaStyle(score);
                   return (
                     <Link
-                      href={`/admin/laporan/${l.kode_laporan}`}
+                      href={`/kader/laporan/${l.kode_laporan}`}
                       key={l.kode_laporan}
                       className="block p-4 rounded-xl shadow-sm border-l-4 border-y border-r hover:shadow-md transition-shadow"
                       style={{
