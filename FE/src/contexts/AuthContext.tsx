@@ -26,13 +26,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 async function fetchUserProfile(session: Session | null): Promise<AppUser | null> {
   if (!session?.access_token) return null;
-  try {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    });
-    if (res.ok) return await res.json();
-  } catch {}
-  return null;
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    console.error("fetchUserProfile failed:", err);
+    return null;
+  }
+  return await res.json();
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -41,18 +43,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (cancelled) return;
       setSession(currentSession);
-      fetchUserProfile(currentSession).then(setUser);
+      return fetchUserProfile(currentSession);
+    }).then(profile => {
+      if (cancelled) return;
+      if (profile) setUser(profile);
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
       setSession(currentSession);
-      fetchUserProfile(currentSession).then(setUser);
+      const profile = await fetchUserProfile(currentSession);
+      setUser(profile);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
