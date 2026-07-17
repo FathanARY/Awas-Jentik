@@ -1,5 +1,7 @@
 import os
 import uuid
+import asyncio
+import logging
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlmodel import Session, select
 from typing import Optional
@@ -17,7 +19,10 @@ from app.services.smoothing import (
     simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
 )
 from app.routers.notifications import trigger_notifikasi
-from app.config import UPLOAD_DIR
+from app.config import UPLOAD_DIR, AI_ENGINE_URL, USE_AI_ENGINE
+from app.services.ai_engine_client import predict_via_ai_engine
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["laporan"])
 
@@ -99,6 +104,21 @@ async def submit_laporan(
         grid_id = f"AREA-{gx:02d}{gy:02d}"
 
     kode_laporan = generate_kode()
+
+    ai_engine_result = None
+    if AI_ENGINE_URL:
+        _ai_grid_id = grid_id or "HJ-G-0001"
+        try:
+            ai_engine_result = await predict_via_ai_engine(
+                grid_id=_ai_grid_id,
+                habitat_input=habitat_input,
+                mobility_input=mobility_input,
+                include_explanation=False,
+            )
+            if ai_engine_result:
+                logger.info(f"AI Engine verification: {ai_engine_result['risiko_gabungan']} (local: {risk['risiko_gabungan']})")
+        except Exception as e:
+            logger.warning(f"AI Engine call failed (non-blocking): {e}")
 
     if grid_id:
         riwayat_terakhir = session.exec(

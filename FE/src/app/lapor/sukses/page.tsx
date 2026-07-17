@@ -4,23 +4,16 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { apiFetch } from "../../api";
+import { getRiskStyle } from "@/lib/risk-utils";
 
 interface LaporanDetail {
   kode_laporan: string;
   risiko_gabungan: number | null;
   heatmap_category: string | null;
-  habitat_category: string | null;
+  heatmap_level: number | null;
   lat: number | null;
   lng: number | null;
   alamat: string | null;
-}
-
-function getRiskColors(score: number | null, category: string | null) {
-  if (!score && score !== 0) return { bg: "var(--color-surface-container)", left: "var(--color-outline)", chipBg: "var(--color-surface-container-high)", chipFg: "var(--color-on-surface-variant)", level: "Unknown" };
-  if (category === "Very High" || score >= 80) return { bg: "var(--color-error-container)", left: "var(--color-error)", chipBg: "var(--color-error)", chipFg: "var(--color-on-error)", level: "Critical" };
-  if (category === "High" || score >= 60) return { bg: "#fef3c7", left: "#f59e0b", chipBg: "#f59e0b", chipFg: "#92400e", level: "High" };
-  if (category === "Medium" || score >= 40) return { bg: "var(--color-surface-container-high)", left: "var(--color-secondary)", chipBg: "var(--color-secondary-container)", chipFg: "var(--color-on-secondary-container)", level: "Medium" };
-  return { bg: "var(--color-surface-container)", left: "#10b981", chipBg: "#d1fae5", chipFg: "#065f46", level: "Low" };
 }
 
 function LaporSuksesContent() {
@@ -37,7 +30,7 @@ function LaporSuksesContent() {
       .finally(() => setLoading(false));
   }, [kode]);
 
-  const risk = getRiskColors(data?.risiko_gabungan ?? null, data?.heatmap_category ?? null);
+  const risk = getRiskStyle(data?.risiko_gabungan ?? null);
   const score = data?.risiko_gabungan ?? 0;
 
   return (
@@ -62,10 +55,10 @@ function LaporSuksesContent() {
             </div>
           ) : (
             <>
-              <div className="animate-enter opacity-0 delay-100 rounded-lg p-6 border-l-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden" style={{ backgroundColor: risk.bg, borderLeftColor: risk.left }}>
-                <div className="absolute right-0 top-0 w-32 h-32 rounded-full -mr-16 -mt-16 pointer-events-none" style={{ backgroundColor: risk.left, opacity: 0.05 }} />
+              <div className="animate-enter opacity-0 delay-100 rounded-lg p-6 border-l-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden" style={{ backgroundColor: risk.bg, borderLeftColor: risk.borderLeft }}>
+                <div className="absolute right-0 top-0 w-32 h-32 rounded-full -mr-16 -mt-16 pointer-events-none" style={{ backgroundColor: risk.borderLeft, opacity: 0.05 }} />
                 <div className="flex items-center gap-4 relative z-10">
-                  <div className="p-2 rounded-full" style={{ backgroundColor: `${risk.left}1a`, color: risk.left }}>
+                  <div className="p-2 rounded-full" style={{ backgroundColor: `${risk.borderLeft}1a`, color: risk.borderLeft }}>
                     <span className="material-symbols-outlined filled-icon text-xl">warning</span>
                   </div>
                   <div>

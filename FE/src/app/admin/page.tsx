@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { apiFetch } from "../api";
 import LiveCommunityMap from "@/components/LiveCommunityMap";
+import { getRiskStyle, getScoreThresholdStyle } from "@/lib/risk-utils";
 
 interface StatsItem {
   total_laporan: number;
@@ -60,14 +61,8 @@ interface CsvPreviewData {
   rows: { grid_id: string; pendatang_30_hari: number; pendatang_dari_endemis: number; pekerja_mobil: number; riwayat_perjalanan_endemis: number; valid: boolean; error: string | null }[];
 }
 
-function getAreaStyle(score: number) {
-  if (score >= 80) return { borderColor: "var(--color-error)", chipBg: "var(--color-error-container)", chipFg: "var(--color-on-error-container)", scoreFg: "var(--color-error)", icon: "trending_up" };
-  if (score >= 60) return { borderColor: "#f59e0b", chipBg: "#fef3c7", chipFg: "#92400e", scoreFg: "#b45309", icon: "warning" };
-  return { borderColor: "#10b981", chipBg: "#d1fae5", chipFg: "#065f46", scoreFg: "#059669", icon: "info" };
-}
-
 export default function AdminDashboardPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState<StatsItem | null>(null);
   const [changes, setChanges] = useState<ChangeItem[]>([]);
@@ -308,7 +303,7 @@ export default function AdminDashboardPage() {
                 }
                 return priorityLaporans.sort((a, b) => (b.risiko_gabungan ?? 0) - (a.risiko_gabungan ?? 0)).map((l) => {
                   const score = l.risiko_gabungan ?? 0;
-                const style = getAreaStyle(score);
+                const style = getRiskStyle(score);
                 return (
                 <Link
                   href={`/admin/laporan/${l.kode_laporan}`}
@@ -316,7 +311,7 @@ export default function AdminDashboardPage() {
                   className="block p-4 rounded-xl shadow-sm border-l-4 border-y border-r hover:shadow-md transition-shadow cursor-pointer"
                   style={{
                     backgroundColor: "var(--color-surface)",
-                    borderLeftColor: style.borderColor,
+                    borderLeftColor: style.borderLeft,
                     borderTopColor: "var(--color-outline-variant)",
                     borderRightColor: "var(--color-outline-variant)",
                     borderBottomColor: "var(--color-outline-variant)",
@@ -369,7 +364,7 @@ export default function AdminDashboardPage() {
                         {l.status}
                       </span>
                       {l.risiko_gabungan != null && (
-                        <span className="text-xs font-bold" style={{ color: (l.risiko_gabungan ?? 0) >= 75 ? "var(--color-error)" : (l.risiko_gabungan ?? 0) >= 50 ? "#b45309" : "#059669" }}>
+                        <span className="text-xs font-bold" style={{ color: getScoreThresholdStyle(l.risiko_gabungan).color }}>
                           {l.risiko_gabungan.toFixed(0)}/100
                         </span>
                       )}

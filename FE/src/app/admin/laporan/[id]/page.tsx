@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { apiFetch } from "../../../api";
+import { getRiskStyle, getWeightFormula } from "@/lib/risk-utils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
@@ -28,14 +29,7 @@ interface LaporanDetail {
   case_score: number | null;
   risiko_gabungan: number | null;
   heatmap_category: string | null;
-}
-
-function getRiskStyle(score: number | null) {
-  if (!score) return { bg: "var(--color-surface-container)", fg: "var(--color-on-surface-variant)", level: "Unknown" };
-  if (score >= 80) return { bg: "var(--color-error-container)", fg: "var(--color-on-error-container)", level: "Critical" };
-  if (score >= 60) return { bg: "#fef3c7", fg: "#92400e", level: "High" };
-  if (score >= 40) return { bg: "var(--color-surface-container-high)", fg: "var(--color-on-surface-variant)", level: "Medium" };
-  return { bg: "#d1fae5", fg: "#065f46", level: "Low" };
+  heatmap_level: number | null;
 }
 
 export default function AdminLaporanDetailPage() {
@@ -212,12 +206,12 @@ export default function AdminLaporanDetailPage() {
                 <span className="font-bold" style={{ fontSize: 48, lineHeight: 1, color: "var(--color-on-surface)" }}>{Math.round(skor)}</span>
                 <span className="text-lg" style={{ color: "var(--color-on-surface-variant)" }}>/ 100</span>
               </div>
-              <div className="px-4 py-1.5 rounded-full flex items-center gap-2" style={{ backgroundColor: risk.bg, color: risk.fg }}>
+              <div className="px-4 py-1.5 rounded-full flex items-center gap-2" style={{ backgroundColor: risk.chipBg, color: risk.chipFg }}>
                 <span className="material-symbols-outlined text-lg">warning</span>
                 <span className="text-xl font-semibold">{risk.level}</span>
               </div>
               <p className="text-sm mt-4" style={{ color: "var(--color-on-surface-variant)" }}>
-                Combined risk = 0.65 × Habitat + 0.20 × Mobility + 0.15 × Cases. Category: {data.heatmap_category || "—"}.
+                {getWeightFormula()}. Kategori: {data.heatmap_category || "—"}.
               </p>
             </section>
           </div>

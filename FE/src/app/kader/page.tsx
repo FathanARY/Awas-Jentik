@@ -44,7 +44,7 @@ function getAreaStyle(score: number) {
 }
 
 export default function KaderDashboardPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"verify" | "mobilitas">("verify");
   const [laporans, setLaporans] = useState<LaporanItem[]>([]);
@@ -130,7 +130,7 @@ export default function KaderDashboardPage() {
                 Admin Panel
               </Link>
             )}
-            <button onClick={logout} className="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-rose-600 hover:bg-rose-100 transition-colors">
+            <button onClick={signOut} className="px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-rose-600 hover:bg-rose-100 transition-colors">
               Logout
             </button>
             <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">

@@ -50,6 +50,8 @@ class RiskScoreResponse(BaseModel):
     case_score: float
     risiko_gabungan: float
     heatmap_category: str
+    heatmap_level: int
+    heatmap_color: str
 
 
 class LaporanResponse(BaseModel):
@@ -70,6 +72,8 @@ class LaporanResponse(BaseModel):
     case_score: Optional[float] = None
     risiko_gabungan: Optional[float] = None
     heatmap_category: Optional[str] = None
+    heatmap_level: Optional[int] = None
+    heatmap_color: Optional[str] = None
     tindakan: Optional[str] = None
     ditindaklanjuti_pada: Optional[datetime] = None
 

@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 export default function Header({ leftContent, rightContent }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function Header({ leftContent, rightContent }: HeaderProps) {
                     Riwayat Laporan
                   </Link>
                   <button
-                    onClick={logout}
+                    onClick={signOut}
                     className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error-container transition-colors rounded-b-xl"
                   >
                     Keluar

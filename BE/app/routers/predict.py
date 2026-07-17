@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas import PredictRequest, RiskScoreResponse
 from app.services import predict_risk
+from app.config import AI_ENGINE_URL
+from app.services.ai_engine_client import predict_via_ai_engine
 
 router = APIRouter(prefix="/api", tags=["predict"])
 
@@ -28,6 +30,15 @@ async def predict(req: PredictRequest):
         "Pekerja_Mobil": req.mobility.pekerja_mobil,
         "Riwayat_Perjalanan_Endemis": req.mobility.riwayat_perjalanan_endemis,
     }
+
+    if AI_ENGINE_URL:
+        ai_result = await predict_via_ai_engine(
+            grid_id="HJ-G-0001",
+            habitat_input=habitat_input,
+            mobility_input=mobility_input,
+        )
+        if ai_result:
+            return RiskScoreResponse(**ai_result)
 
     result = predict_risk(habitat_input, mobility_input, req.kasus_radius_1km)
     return RiskScoreResponse(**result)
