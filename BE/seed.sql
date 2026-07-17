@@ -1,12 +1,12 @@
 -- ============================================================
 -- MalariaWatch — Seed Data
 -- Run AFTER schema.sql
--- Users: admin / password123, user / password123
+-- Auth via Supabase — default users seeded with role only
 -- ============================================================
 
-INSERT INTO users (username, password_hash, role) VALUES
-('admin', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'admin'),
-('user', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'user')
+INSERT INTO users (username, email, role) VALUES
+('admin', 'admin@malariawatch.com', 'admin'),
+('user', 'user@malariawatch.com', 'user')
 ON CONFLICT (username) DO NOTHING;
 
 -- Laporan (9 demo reports)
@@ -28,5 +28,3 @@ VALUES
   ('MW-2026-7E8247', 'menunggu', '2026-06-28T22:10:21.250862', -6.18, 106.846666, 'Desa Margomulyo, Kecamatan Sumba Timur', 30, 40, 'Tidak', 'Tinggi', 15.0, 250, 200, 300, 250, 1500, 800, 150, 1200, 2, 0, 1, 0, 1, 35, 'Low', 28, 16, 29, 'Rendah', NULL, NULL, NULL),
   ('MW-2026-08937E', 'menunggu', '2026-06-25T22:10:21.250862', -6.17, 106.856666, 'Desa Sidomakmur, Kecamatan Sumba Timur', 25, 35, 'Tidak', 'Tinggi', 12.0, 230, 180, 280, 230, 1600, 750, 140, 1100, 1, 0, 1, 0, 0, 30, 'Low', 22, 0, 24, 'Rendah', NULL, NULL, NULL),
   ('MW-2026-770F87', 'ditindaklanjuti', '2026-06-22T22:10:21.250862', -6.16, 106.866666, 'Desa Sukamaju, Kecamatan Sumba Timur', 35, 45, 'Tidak', 'Tinggi', 18.0, 270, 220, 320, 270, 1400, 850, 160, 1300, 3, 0, 2, 1, 2, 38, 'Low', 32, 32, 35, 'Rendah', 'Fogging terjadwal', '2026-06-22T22:10:21.250862', 'Dr. Budi Santoso');
-
--- Verify: SELECT * FROM laporan;

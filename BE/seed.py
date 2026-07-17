@@ -11,7 +11,7 @@ from app.database import engine
 from app.models.laporan import Laporan
 from app.models.user import User
 from app.services import predict_risk
-from app.services.auth import get_password_hash
+
 
 LAT_BASE = -6.200000
 LNG_BASE = 106.816666
@@ -24,8 +24,8 @@ DESA_NAMES = [
 def seed_demo(session: Session):
     existing_user = session.exec(select(User).limit(1)).first()
     if not existing_user:
-        admin = User(username="admin", email="admin@malariawatch.com", password_hash=get_password_hash("password123"), role="admin")
-        user = User(username="user", email="user@malariawatch.com", password_hash=get_password_hash("password123"), role="user")
+        admin = User(username="admin", email="admin@malariawatch.com", role="admin")
+        user = User(username="user", email="user@malariawatch.com", role="user")
         session.add(admin)
         session.add(user)
         session.commit()
@@ -99,7 +99,7 @@ def seed_demo(session: Session):
 
             risk = predict_risk(habitat_input, mobility_input, kasus)
 
-            now = datetime.datetime.utcnow()
+            now = datetime.datetime.now(datetime.timezone.utc)
             kode = f"MW-{now.year}-{uuid.uuid4().hex[:6].upper()}"
 
             desa = random.choice(DESA_NAMES)

@@ -1,22 +1,20 @@
 -- ============================================================
--- MalariaWatch — Database Schema for Supabase (PostgreSQL)
--- ============================================================
--- Run this FIRST in SQL Editor before seed.sql
--- Tables are created with IF NOT EXISTS for idempotency
+-- MalariaWatch — Full DB Setup (schema + seed)
+-- Run this in Supabase SQL Editor
+-- Auth via Supabase Auth — this table stores roles only
 -- ============================================================
 
-
--- 1. Users (auth)
+-- 1. Users (role store)
 CREATE TABLE IF NOT EXISTS users (
     id              SERIAL PRIMARY KEY,
     username        VARCHAR(255) NOT NULL UNIQUE,
-    password_hash   TEXT NOT NULL,
+    email           VARCHAR(255),
     role            VARCHAR(32) NOT NULL DEFAULT 'user'
 );
 CREATE INDEX IF NOT EXISTS ix_users_username ON users (username);
+CREATE INDEX IF NOT EXISTS ix_users_email ON users (email);
 
-
--- 2. Laporan (citizen observation reports)
+-- 2. Laporan
 CREATE TABLE IF NOT EXISTS laporan (
     id                          SERIAL PRIMARY KEY,
     kode_laporan                VARCHAR(32) NOT NULL UNIQUE,
@@ -30,7 +28,6 @@ CREATE TABLE IF NOT EXISTS laporan (
     grid_land                   VARCHAR(64),
     alamat                      TEXT,
     foto_path                   TEXT,
-    -- habitat fields
     persentase_lumut            DOUBLE PRECISION,
     persentase_vegetasi         DOUBLE PRECISION,
     air_tenang                  VARCHAR(8),
@@ -44,20 +41,17 @@ CREATE TABLE IF NOT EXISTS laporan (
     jarak_tambang_m             DOUBLE PRECISION,
     jarak_permukiman_m          DOUBLE PRECISION,
     jarak_puskesmas_m           DOUBLE PRECISION,
-    -- mobility fields
     pendatang_30_hari           INTEGER,
     pendatang_dari_endemis      INTEGER,
     pekerja_mobil               INTEGER,
     riwayat_perjalanan_endemis  INTEGER,
     kasus_malaria_1km_30hari    INTEGER,
-    -- AI risk scores
     habitat_risk_score          DOUBLE PRECISION,
     habitat_category            VARCHAR(32),
     mobility_risk_score         DOUBLE PRECISION,
     case_score                  DOUBLE PRECISION,
     risiko_gabungan             DOUBLE PRECISION,
     heatmap_category            VARCHAR(32),
-    -- action tracking
     tindakan                    TEXT,
     ditindaklanjuti_pada        TIMESTAMP,
     diverifikasi_oleh           VARCHAR(255)
@@ -66,8 +60,7 @@ CREATE INDEX IF NOT EXISTS ix_laporan_kode_laporan ON laporan (kode_laporan);
 CREATE INDEX IF NOT EXISTS ix_laporan_grid_id ON laporan (grid_id);
 CREATE INDEX IF NOT EXISTS ix_laporan_status ON laporan (status);
 
-
--- 3. Mobilitas Grid (mobility data per grid, uploaded via CSV)
+-- 3. Mobilitas Grid
 CREATE TABLE IF NOT EXISTS mobilitas_grid (
     id                              SERIAL PRIMARY KEY,
     grid_id                         VARCHAR(32) NOT NULL UNIQUE,
@@ -81,8 +74,7 @@ CREATE TABLE IF NOT EXISTS mobilitas_grid (
 );
 CREATE INDEX IF NOT EXISTS ix_mobilitas_grid_grid_id ON mobilitas_grid (grid_id);
 
-
--- 4. Riwayat Risiko (risk history for change detection)
+-- 4. Riwayat Risiko
 CREATE TABLE IF NOT EXISTS riwayat_risiko (
     id                  SERIAL PRIMARY KEY,
     grid_id             VARCHAR(32) NOT NULL,
@@ -94,8 +86,7 @@ CREATE TABLE IF NOT EXISTS riwayat_risiko (
 );
 CREATE INDEX IF NOT EXISTS ix_riwayat_risiko_grid_id ON riwayat_risiko (grid_id);
 
-
--- 5. CSV Upload Log (audit trail for bulk uploads)
+-- 5. CSV Upload Log
 CREATE TABLE IF NOT EXISTS csv_upload_log (
     id              SERIAL PRIMARY KEY,
     uploaded_by     VARCHAR(64) NOT NULL DEFAULT 'admin',
@@ -108,8 +99,7 @@ CREATE TABLE IF NOT EXISTS csv_upload_log (
     status          VARCHAR(16) NOT NULL DEFAULT 'committed'
 );
 
-
--- 6. Notifications (auto-triggered on risk category changes)
+-- 6. Notifications
 CREATE TABLE IF NOT EXISTS notifications (
     id          SERIAL PRIMARY KEY,
     user_id     INTEGER,
@@ -122,19 +112,15 @@ CREATE TABLE IF NOT EXISTS notifications (
 CREATE INDEX IF NOT EXISTS ix_notifications_user_id ON notifications (user_id);
 CREATE INDEX IF NOT EXISTS ix_notifications_grid_id ON notifications (grid_id);
 
-
 -- ============================================================
--- MalariaWatch — Seed Data
--- Run AFTER schema.sql
--- Users: admin / password123, user / password123
+-- Seed Data
 -- ============================================================
 
-INSERT INTO users (username, password_hash, role) VALUES
-('admin', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'admin'),
-('user', '$2b$12$tC6peAS303yaL/Xs4ts09.CuCXj99BzOSIeNm1NLcuc7hC/p8d7My', 'user')
+INSERT INTO users (username, email, role) VALUES
+('admin', 'admin@malariawatch.com', 'admin'),
+('user', 'user@malariawatch.com', 'user')
 ON CONFLICT (username) DO NOTHING;
 
--- Laporan (9 demo reports)
 INSERT INTO laporan (kode_laporan, status, created_at, lat, lng, alamat,
   persentase_lumut, persentase_vegetasi, air_tenang, paparan_matahari,
   luas_genangan_m2, curah_hujan_30_hari_mm,
@@ -153,5 +139,3 @@ VALUES
   ('MW-2026-7E8247', 'menunggu', '2026-06-28T22:10:21.250862', -6.18, 106.846666, 'Desa Margomulyo, Kecamatan Sumba Timur', 30, 40, 'Tidak', 'Tinggi', 15.0, 250, 200, 300, 250, 1500, 800, 150, 1200, 2, 0, 1, 0, 1, 35, 'Low', 28, 16, 29, 'Rendah', NULL, NULL, NULL),
   ('MW-2026-08937E', 'menunggu', '2026-06-25T22:10:21.250862', -6.17, 106.856666, 'Desa Sidomakmur, Kecamatan Sumba Timur', 25, 35, 'Tidak', 'Tinggi', 12.0, 230, 180, 280, 230, 1600, 750, 140, 1100, 1, 0, 1, 0, 0, 30, 'Low', 22, 0, 24, 'Rendah', NULL, NULL, NULL),
   ('MW-2026-770F87', 'ditindaklanjuti', '2026-06-22T22:10:21.250862', -6.16, 106.866666, 'Desa Sukamaju, Kecamatan Sumba Timur', 35, 45, 'Tidak', 'Tinggi', 18.0, 270, 220, 320, 270, 1400, 850, 160, 1300, 3, 0, 2, 1, 2, 38, 'Low', 32, 32, 35, 'Rendah', 'Fogging terjadwal', '2026-06-22T22:10:21.250862', 'Dr. Budi Santoso');
-
--- Verify: SELECT * FROM laporan;

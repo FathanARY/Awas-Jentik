@@ -6,14 +6,15 @@
 -- ============================================================
 
 
--- 1. Users (auth)
+-- 1. Users (role store — auth handled by Supabase Auth)
 CREATE TABLE IF NOT EXISTS users (
     id              SERIAL PRIMARY KEY,
     username        VARCHAR(255) NOT NULL UNIQUE,
-    password_hash   TEXT NOT NULL,
+    email           VARCHAR(255),
     role            VARCHAR(32) NOT NULL DEFAULT 'user'
 );
 CREATE INDEX IF NOT EXISTS ix_users_username ON users (username);
+CREATE INDEX IF NOT EXISTS ix_users_email ON users (email);
 
 
 -- 2. Laporan (citizen observation reports)
