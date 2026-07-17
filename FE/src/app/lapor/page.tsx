@@ -236,6 +236,15 @@ export default function LaporPage() {
               Verification Photo <span className="text-xs font-bold px-2 py-1 bg-rose-100 text-rose-700 rounded-md uppercase tracking-wider ml-2">Required</span>
             </h3>
             
+            <input
+              ref={photoInputRef}
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              type="file"
+              name="foto"
+              onChange={(e) => setPhotoFile(e.target.files?.[0]?.name ?? null)}
+            />
             {photoFile ? (
               /* ── Success state ── */
               <div className="w-full border-2 border-emerald-200 bg-emerald-50/60 rounded-2xl p-10 flex flex-col items-center justify-center min-h-[240px] text-center">
@@ -268,20 +277,10 @@ export default function LaporPage() {
                   <span className="material-symbols-outlined text-base">photo_camera</span>
                   Choose Another Photo
                 </button>
-
-                <input
-                  ref={photoInputRef}
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  type="file"
-                  name="foto"
-                  onChange={(e) => setPhotoFile(e.target.files?.[0]?.name ?? null)}
-                />
               </div>
             ) : (
               /* ── Default upload prompt ── */
-              <label className="block w-full border-2 border-dashed border-blue-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer min-h-[240px] text-center transition-all group">
+              <div onClick={() => photoInputRef.current?.click()} className="block w-full border-2 border-dashed border-blue-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-2xl p-10 flex flex-col items-center justify-center cursor-pointer min-h-[240px] text-center transition-all group">
                 <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                   <span className="material-symbols-outlined text-3xl">cloud_upload</span>
                 </div>
@@ -291,16 +290,7 @@ export default function LaporPage() {
                 <p className="text-sm text-slate-500 font-medium">
                   Ensure the puddle is clearly visible along with its surrounding area.
                 </p>
-                <input
-                  ref={photoInputRef}
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  type="file"
-                  name="foto"
-                  onChange={(e) => setPhotoFile(e.target.files?.[0]?.name ?? null)}
-                />
-              </label>
+              </div>
             )}
           </section>
 

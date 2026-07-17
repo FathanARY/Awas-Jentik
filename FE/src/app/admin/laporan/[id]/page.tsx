@@ -15,6 +15,7 @@ interface LaporanDetail {
   lat: number | null;
   lng: number | null;
   alamat: string | null;
+  foto_path: string | null;
   persentase_lumut: number | null;
   persentase_vegetasi: number | null;
   air_tenang: string | null;
@@ -56,16 +57,12 @@ export default function AdminLaporanDetailPage() {
     setActionLoading("verify");
     setActionMsg(null);
     try {
-      const res = await fetch(`${API_BASE}/laporan/${id}/verify`, {
+      const updated = await apiFetch<LaporanDetail>(`/laporan/${id}/verify`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("access_token")}` },
         body: JSON.stringify({ diverifikasi_oleh: "Admin" }),
       });
-      if (res.ok) {
-        const updated = await res.json();
-        setData(updated);
-        setActionMsg("Report verified successfully!");
-      }
+      setData(updated);
+      setActionMsg("Report verified successfully!");
     } catch { setActionMsg("Verification failed."); }
     setActionLoading(null);
   }
@@ -74,16 +71,12 @@ export default function AdminLaporanDetailPage() {
     setActionLoading("tindakan");
     setActionMsg(null);
     try {
-      const res = await fetch(`${API_BASE}/laporan/${id}/tindakan`, {
+      const updated = await apiFetch<LaporanDetail>(`/laporan/${id}/tindakan`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("access_token")}` },
         body: JSON.stringify({ tindakan, diverifikasi_oleh: "Admin" }),
       });
-      if (res.ok) {
-        const updated = await res.json();
-        setData(updated);
-        setActionMsg(`Action "${tindakan}" recorded.`);
-      }
+      setData(updated);
+      setActionMsg(`Action "${tindakan}" recorded.`);
     } catch { setActionMsg("Action failed."); }
     setActionLoading(null);
   }
@@ -138,7 +131,7 @@ export default function AdminLaporanDetailPage() {
         }
       />
 
-      <main className="flex-grow max-w-7xl mx-auto w-full px-4 md:px-12 py-6 md:py-8">
+      <main className="flex-grow max-w-7xl mx-auto w-full p-4 pt-32 md:p-12 md:pt-36">
         {actionMsg && (
           <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2" style={actionMsg.includes("failed") ? { backgroundColor: "var(--color-error-container)", color: "var(--color-on-error-container)" } : { backgroundColor: "#d1fae5", color: "#065f46" }}>
             <span className="material-symbols-outlined text-lg">{actionMsg.includes("failed") ? "error" : "check_circle"}</span>
@@ -154,16 +147,20 @@ export default function AdminLaporanDetailPage() {
                 <h2 className="text-xl font-semibold" style={{ color: "var(--color-on-surface)" }}>Field Observation Data</h2>
               </div>
               <div className="p-4 flex flex-col gap-6">
-                {data.lat && data.lng && (
+                {data.foto_path ? (
                   <div className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-on-surface-variant)" }}>Location</h3>
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden border" style={{ backgroundColor: "var(--color-surface-container)", borderColor: "var(--color-outline-variant)" }}>
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(33,49,69,0.05)" }}>
-                        <span className="material-symbols-outlined text-4xl" style={{ color: "var(--color-primary)" }}>location_on</span>
-                      </div>
-                      <div className="absolute bottom-2 right-2 px-2 py-1 rounded text-xs backdrop-blur-sm flex items-center gap-1" style={{ backgroundColor: "rgba(33,49,69,0.8)", color: "var(--color-inverse-on-surface)" }}>
-                        {data.lat.toFixed(6)}, {data.lng.toFixed(6)}
-                      </div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-on-surface-variant)" }}>Report Image</h3>
+                    <div className="relative w-full h-48 sm:h-64 rounded-lg overflow-hidden border" style={{ backgroundColor: "var(--color-surface-container)", borderColor: "var(--color-outline-variant)" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`${API_BASE.replace('/api', '')}${data.foto_path}`} alt="Report Image" className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-on-surface-variant)" }}>Report Image</h3>
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden border flex items-center justify-center flex-col gap-2" style={{ backgroundColor: "var(--color-surface-container)", borderColor: "var(--color-outline-variant)", color: "var(--color-on-surface-variant)" }}>
+                      <span className="material-symbols-outlined text-4xl">image_not_supported</span>
+                      <span className="text-sm font-medium">No Image Attached</span>
                     </div>
                   </div>
                 )}
@@ -194,14 +191,14 @@ export default function AdminLaporanDetailPage() {
               <table className="w-full text-left border-collapse">
                 <tbody>
                   {[
-                    { item: "Habitat Score", result: `${data.habitat_risk_score ?? "—"}`, icon: "eco", color: "var(--color-primary)" },
-                    { item: "Mobility Score", result: `${data.mobility_risk_score ?? "—"}`, icon: "directions_walk", color: "var(--color-secondary)" },
-                    { item: "Case Score", result: `${data.case_score ?? "—"}`, icon: "coronavirus", color: "var(--color-error)" },
+                    { item: "Habitat Score", result: `${data.habitat_risk_score ?? "—"}`, icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-leaf"><path d="M11 20A7 7 0 0 1 14 6h7v7a7 7 0 0 1-14 0Z"/><path d="M11 20v-5"/></svg>, color: "var(--color-primary)" },
+                    { item: "Mobility Score", result: `${data.mobility_risk_score ?? "—"}`, icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-footprints"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></svg>, color: "var(--color-secondary)" },
+                    { item: "Case Score", result: `${data.case_score ?? "—"}`, icon: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bug"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>, color: "var(--color-error)" },
                   ].map((row, i) => (
                     <tr key={row.item} className="border-b" style={{ borderColor: i < 2 ? "rgba(196,197,213,0.3)" : "transparent" }}>
                       <td className="py-3 px-4 text-base" style={{ color: "var(--color-on-surface)" }}>{row.item}</td>
                       <td className="py-3 px-4 text-right">
-                        <span className="inline-flex items-center gap-1 text-sm font-bold" style={{ color: row.color }}>{row.icon} {row.result}</span>
+                        <span className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: row.color }}>{row.icon} {row.result}</span>
                       </td>
                     </tr>
                   ))}

@@ -237,6 +237,48 @@ async def get_changes(
                     kategori_baru=baru.kategori,
                     sumber_perubahan=baru.sumber_perubahan,
                 ))
+        elif len(riwayat) == 1:
+            baru = riwayat[0]
+            if baru.kategori != "Sangat Rendah":
+                changes.append(ChangeItem(
+                    grid_id=grid_id,
+                    timestamp=baru.timestamp,
+                    skor_lama=0.0,
+                    skor_baru=baru.skor,
+                    kategori_lama="Sangat Rendah",
+                    kategori_baru=baru.kategori,
+                    sumber_perubahan=baru.sumber_perubahan,
+                ))
+
+    from app.models.laporan import Laporan
+    from app.services.smoothing import skor_ke_kategori
+
+    laporans = session.exec(
+        select(Laporan).where(Laporan.lat != None, Laporan.lng != None, Laporan.risiko_gabungan != None)
+    ).all()
+
+    laporan_grids = {}
+    for l in laporans:
+        if l.lat and l.lng:
+            gx = int(abs(l.lat) * 100) % 100
+            gy = int(abs(l.lng) * 100) % 100
+            gid = f"AREA-{gx:02d}{gy:02d}"
+            if gid not in all_grids:
+                if gid not in laporan_grids or l.created_at > laporan_grids[gid].created_at:
+                    laporan_grids[gid] = l
+
+    for gid, l in laporan_grids.items():
+        kategori_baru = l.heatmap_category or skor_ke_kategori(l.risiko_gabungan or 0)
+        if kategori_baru != "Sangat Rendah":
+            changes.append(ChangeItem(
+                grid_id=gid,
+                timestamp=l.created_at,
+                skor_lama=0.0,
+                skor_baru=l.risiko_gabungan or 0.0,
+                kategori_lama="Sangat Rendah",
+                kategori_baru=kategori_baru,
+                sumber_perubahan=f"Laporan Baru: {l.kode_laporan}",
+            ))
 
     changes.sort(key=lambda c: c.timestamp, reverse=True)
     return ChangesResponse(changes=changes[:limit], total=len(changes))

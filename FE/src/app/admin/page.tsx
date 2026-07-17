@@ -141,22 +141,6 @@ export default function AdminDashboardPage() {
       className="flex min-h-dvh"
       style={{ backgroundColor: "var(--color-background)" }}
     >
-      {/* Alert Banner */}
-      {changes.length > 0 && (
-      <div
-        className="fixed top-0 left-0 w-full z-[60] py-2 px-6 flex items-center justify-center shadow-lg"
-        style={{
-          backgroundColor: "var(--color-error)",
-          color: "var(--color-on-error)",
-        }}
-        id="top-alert"
-      >
-        <span className="material-symbols-outlined filled-icon mr-2">warning</span>
-        <span className="text-sm font-bold uppercase tracking-wide">
-          High Risk Cluster Detected!
-        </span>
-      </div>
-      )}
 
       <Header 
         leftContent={
@@ -213,7 +197,7 @@ export default function AdminDashboardPage() {
       />
 
       {/* Main Content */}
-      <main className="pt-36 p-4 md:p-12 min-h-screen w-full max-w-[1600px] mx-auto">
+      <main className="p-4 pt-32 md:p-12 md:pt-36 min-h-screen w-full max-w-[1600px] mx-auto">
         {stats && (
           <div className="grid grid-cols-4 gap-4 mb-6 mt-4">
             {[
@@ -234,9 +218,9 @@ export default function AdminDashboardPage() {
             ))}
           </div>
         )}
-        <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-260px)]">
+        <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-280px)] min-h-[500px]">
           {/* Map */}
-          <div className="flex-1 bg-white p-6 rounded-2xl border shadow-sm flex flex-col" style={{ borderColor: "var(--color-outline-variant)" }}>
+          <div className="flex-1 min-h-0 bg-white p-6 rounded-2xl border shadow-sm flex flex-col" style={{ borderColor: "var(--color-outline-variant)" }}>
             <LiveCommunityMap />
           </div>
 
@@ -268,13 +252,18 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-              {activeTab === "priority" && (laporans.length === 0 ? (
-                <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>
-                  <span className="material-symbols-outlined text-3xl mb-2">trending_up</span>
-                  <p className="text-sm font-medium">No priority reports.</p>
-                </div>
-              ) : [...laporans].sort((a, b) => (b.risiko_gabungan ?? 0) - (a.risiko_gabungan ?? 0)).map((l) => {
-                const score = l.risiko_gabungan ?? 0;
+              {activeTab === "priority" && (() => {
+                const priorityLaporans = laporans.filter(l => l.status !== 'ditindaklanjuti');
+                if (priorityLaporans.length === 0) {
+                  return (
+                    <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>
+                      <span className="material-symbols-outlined text-3xl mb-2">trending_up</span>
+                      <p className="text-sm font-medium">No priority reports.</p>
+                    </div>
+                  );
+                }
+                return priorityLaporans.sort((a, b) => (b.risiko_gabungan ?? 0) - (a.risiko_gabungan ?? 0)).map((l) => {
+                  const score = l.risiko_gabungan ?? 0;
                 const style = getAreaStyle(score);
                 return (
                 <Link
@@ -310,7 +299,9 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 </Link>
-              )}))}
+                  );
+                });
+              })()}
 
               {activeTab === "laporan" && (laporans.length === 0 ? (
                 <div className="text-center py-8" style={{ color: "var(--color-on-surface-variant)" }}>

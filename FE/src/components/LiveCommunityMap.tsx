@@ -143,14 +143,14 @@ export default function LiveCommunityMap() {
   }
 
   return (
-    <div className="flex flex-col flex-1 relative z-10">
+    <div className="flex flex-col flex-1 relative z-10 min-h-0 h-full">
       {/* Header Area */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4 shrink-0">
         <div>
           <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
             <span className="material-symbols-outlined text-xl">map</span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Live Risky Heat-Map</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Live Report Heat-Map</h2>
           <p className="text-slate-500 font-medium">Tracking hotspots in real-time.</p>
         </div>
         
@@ -181,23 +181,25 @@ export default function LiveCommunityMap() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
-        {/* Map Container - Full width without letterboxing */}
-        <div className="w-full max-w-[400px] mx-auto rounded-2xl overflow-hidden border border-slate-200 relative bg-[#c0b8a8]">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-auto aspect-square cursor-crosshair block shadow-inner"
-            style={{ imageRendering: "pixelated" }}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => setHovered(null)}
-          />
-          
-          {/* Map Gradient Overlay to match existing aesthetic */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent pointer-events-none" />
+      <div className="flex flex-col gap-4 flex-1 min-h-0">
+        {/* Map Container - responsive to height to avoid cutoff */}
+        <div className="flex-1 min-h-0 flex items-center justify-center">
+          <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-[#c0b8a8] aspect-square h-full max-h-[500px] max-w-full">
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full cursor-crosshair block shadow-inner"
+              style={{ imageRendering: "pixelated" }}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setHovered(null)}
+            />
+            
+            {/* Map Gradient Overlay to match existing aesthetic */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent pointer-events-none" />
+          </div>
         </div>
 
       {/* Legend Container Moved Outside */}
-      <div className="flex flex-wrap items-center justify-center mx-auto gap-x-6 gap-y-3 bg-white/50 backdrop-blur-sm border border-slate-200/80 px-4 py-3 rounded-xl shadow-sm text-xs font-medium text-slate-700 w-fit">
+      <div className="flex flex-wrap items-center justify-center mx-auto gap-x-6 gap-y-3 bg-white/50 backdrop-blur-sm border border-slate-200/80 px-4 py-3 rounded-xl shadow-sm text-xs font-medium text-slate-700 w-fit shrink-0">
         <div className="text-slate-400 uppercase tracking-widest font-bold text-[10px]">Hotspots</div>
         <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#dc2626] bg-[#dc2626]/40" /> Tinggi (Risk ≥ 75)</div>
         <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-sm border-2 border-[#f97316] bg-[#f97316]/40" /> Sedang (Risk ≥ 50)</div>
