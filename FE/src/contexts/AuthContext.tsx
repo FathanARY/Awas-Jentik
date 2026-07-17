@@ -1,60 +1,87 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import { API_BASE } from "@/app/api";
+import type { Session } from "@supabase/supabase-js";
 
 interface AppUser {
   id: number;
   username: string;
+  email: string;
   role: string;
 }
 
 interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
-  token: string | null;
-  login: (token: string, user: AppUser) => void;
-  logout: () => void;
+  session: Session | null;
+  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+async function fetchUserProfile(session: Session | null): Promise<AppUser | null> {
+  if (!session?.access_token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (res.ok) return await res.json();
+  } catch {}
+  return null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedToken = localStorage.getItem("access_token");
-      const savedUser = localStorage.getItem("user");
-      if (savedToken && savedUser) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
-      }
-    }
-    setLoading(false);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      fetchUserProfile(currentSession).then(setUser);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      setSession(currentSession);
+      fetchUserProfile(currentSession).then(setUser);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (newToken: string, userData: AppUser) => {
-    setToken(newToken);
-    setUser(userData);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("access_token", newToken);
-      localStorage.setItem("user", JSON.stringify(userData));
-    }
-  };
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    return {};
+  }, []);
 
-  const logout = () => {
-    setToken(null);
+  const signUp = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) return { error: error.message };
+    return {};
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/admin` },
+    });
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user");
-    }
-  };
+    setSession(null);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, session, signIn, signUp, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );
