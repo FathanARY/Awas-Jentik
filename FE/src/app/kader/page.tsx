@@ -66,7 +66,7 @@ export default function KaderDashboardPage() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
-    if (!loading && (!user || (user.role !== "kader" && user.role !== "admin"))) {
+    if (!loading && (!user || (user.role !== "user" && user.role !== "admin"))) {
       router.push("/");
     }
   }, [user, loading, router]);
@@ -123,7 +123,7 @@ export default function KaderDashboardPage() {
     setSubmitting(false);
   }
 
-  if (loading || !user || (user.role !== "kader" && user.role !== "admin")) {
+  if (loading || !user || (user.role !== "user" && user.role !== "admin")) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -270,11 +270,13 @@ export default function KaderDashboardPage() {
               {selectedGrid && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    {[
-                      { key: "pendatang_30_hari", label: "Pendatang 30 Hari", desc: "Jumlah pendatang dalam 30 hari terakhir", icon: "group" },
-                      { key: "pendatang_dari_endemis", label: "Pendatang dari Endemis", desc: "Subset dari pendatang, berasal dari daerah endemis", icon: "travel_explore" },
-                      { key: "pekerja_mobil", label: "Pekerja Mobil", desc: "Estimasi pekerja tambang/hutan/kebun", icon: "engineering" },
-                      { key: "riwayat_perjalanan_endemis", label: "Riwayat Perjalanan Endemis", desc: "Jumlah orang per 12 bulan", icon: "history" },
+                      {[
+                        { key: "pendatang_30_hari", label: "Pendatang 30 Hari", desc: "Jumlah pendatang dalam 30 hari terakhir", icon: "group" },
+                        { key: "pendatang_dari_endemis", label: "Pendatang dari Endemis", desc: "Subset dari pendatang, berasal dari daerah endemis", icon: "travel_explore" },
+                        { key: "pekerja_tambang", label: "Pekerja Tambang", desc: "Estimasi pekerja tambang di area", icon: "engineering" },
+                        { key: "pekerja_hutan", label: "Pekerja Hutan", desc: "Estimasi pekerja hutan di area", icon: "forest" },
+                        { key: "pekerja_perkebunan", label: "Pekerja Perkebunan", desc: "Estimasi pekerja perkebunan di area", icon: "agriculture" },
+                        { key: "riwayat_perjalanan_endemis", label: "Riwayat Perjalanan Endemis", desc: "Jumlah orang per 12 bulan", icon: "history" },
                     ].map(f => (
                       <div key={f.key} className="p-4 rounded-lg border" style={{ backgroundColor: "var(--color-surface-container)", borderColor: "var(--color-outline-variant)" }}>
                         <div className="flex items-center gap-2 mb-2">
@@ -325,11 +327,11 @@ export default function KaderDashboardPage() {
                     Data Mobilitas Terkini — {selectedGrid}
                   </h3>
                   <div className="space-y-3">
-                    {[
-                      { label: "Pendatang 30 Hari", value: mobilitasResult?.pendatang_30_hari ?? mobilitasData?.pendatang_30_hari },
-                      { label: "Pendatang dari Endemis", value: mobilitasResult?.pendatang_dari_endemis ?? mobilitasData?.pendatang_dari_endemis },
-                      { label: "Pekerja Mobil", value: mobilitasResult?.pekerja_mobil ?? mobilitasData?.pekerja_mobil },
-                      { label: "Riwayat Perjalanan Endemis", value: mobilitasResult?.riwayat_perjalanan_endemis ?? mobilitasData?.riwayat_perjalanan_endemis },
+                      {[
+                        { label: "Pendatang 30 Hari", value: mobilitasResult?.pendatang_30_hari ?? mobilitasData?.pendatang_30_hari },
+                        { label: "Pendatang dari Endemis", value: mobilitasResult?.pendatang_dari_endemis ?? mobilitasData?.pendatang_dari_endemis },
+                        { label: "Pekerja Mobil (Total)", value: mobilitasResult?.pekerja_mobil ?? mobilitasData?.pekerja_mobil },
+                        { label: "Riwayat Perjalanan Endemis", value: mobilitasResult?.riwayat_perjalanan_endemis ?? mobilitasData?.riwayat_perjalanan_endemis },
                     ].map(item => (
                       <div key={item.label} className="flex justify-between text-sm">
                         <span style={{ color: "var(--color-on-surface-variant)" }}>{item.label}</span>

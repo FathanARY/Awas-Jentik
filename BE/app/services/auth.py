@@ -41,7 +41,7 @@ def get_current_user(
             sub = payload.get("sub", "")
             user_meta = payload.get("user_metadata") or {}
             role = user_meta.get("role", "user")
-            if not role or role not in ("user", "kader", "admin"):
+            if not role or role not in ("user", "admin"):
                 role = "user"
 
             user = User(username=username, email=email, role=role)
@@ -67,7 +67,7 @@ def get_current_admin(current_user: User = Depends(get_current_user)):
 
 
 def get_current_kader(current_user: User = Depends(get_current_user)):
-    if current_user.role not in ("kader", "admin"):
+    if current_user.role not in ("user", "admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough privileges",

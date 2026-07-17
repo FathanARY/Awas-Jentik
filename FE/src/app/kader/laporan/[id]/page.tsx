@@ -44,7 +44,7 @@ export default function KaderLaporanDetailPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user || (user.role !== "kader" && user.role !== "admin")) {
+    if (!user || (user.role !== "user" && user.role !== "admin")) {
       router.push("/");
       return;
     }

@@ -4,6 +4,7 @@ from app.database import get_session
 from app.models.laporan import Laporan
 from app.models.pcam import RiwayatRisiko
 from app.schemas import AreaResponse, StatsResponse, GridRiskResponse
+from app.services import cache
 
 router = APIRouter(prefix="/api", tags=["dashboard"])
 
@@ -43,6 +44,10 @@ async def list_areas():
 
 @router.get("/grids/risk", response_model=list[GridRiskResponse])
 async def get_grids_risk(session: Session = Depends(get_session)):
+    cached = cache.cache_get("grids_risk")
+    if cached is not None:
+        return cached
+
     risk_map: dict[str, float] = {}
 
     all_grids = session.exec(
@@ -72,6 +77,7 @@ async def get_grids_risk(session: Session = Depends(get_session)):
     for gid, skor in risk_map.items():
         from app.services.smoothing import skor_ke_kategori
         result.append(GridRiskResponse(grid_id=gid, skor=skor, kategori=skor_ke_kategori(skor)))
+    cache.cache_set("grids_risk", result)
     return result
 
 

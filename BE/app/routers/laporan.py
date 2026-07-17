@@ -15,6 +15,7 @@ from app.services.auth import get_current_kader
 from app.schemas import LaporRequest, LaporanResponse, LaporanDetailResponse, TindakanRequest
 from app.services import predict_risk, reverse_geocode
 from app.services.grid_distances import estimate_distances
+from app.services import cache
 from app.services.smoothing import (
     ema_smooth, skor_ke_kategori, kategori_naik, batasi_lompatan,
     simpan_riwayat, hitung_n_laporan, cek_cluster_darurat,
@@ -205,6 +206,7 @@ async def submit_laporan(
     session.add(laporan)
     session.commit()
     session.refresh(laporan)
+    cache.cache_bust("grids_risk")
     return laporan
 
 
@@ -252,6 +254,7 @@ async def update_tindakan(
     session.add(laporan)
     session.commit()
     session.refresh(laporan)
+    cache.cache_bust("grids_risk")
     return laporan
 
 
@@ -308,4 +311,5 @@ async def verify_laporan(
     session.add(laporan)
     session.commit()
     session.refresh(laporan)
+    cache.cache_bust("grids_risk")
     return laporan
