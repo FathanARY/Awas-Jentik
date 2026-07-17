@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -14,10 +14,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (user) {
-    router.push(user.role === "admin" ? "/admin" : "/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      router.push(user.role === "admin" ? "/admin" : "/");
+    }
+  }, [user, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,9 +31,6 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
-
-    router.push("/admin");
-    setLoading(false);
   }
 
   return (

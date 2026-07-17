@@ -14,9 +14,10 @@ export async function apiFetch<T = unknown>(
   options?: RequestInit
 ): Promise<T> {
   const authHeaders = await getAuthHeaders();
+  const { headers: callerHeaders, ...restOptions } = options || {};
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...authHeaders, ...options?.headers },
-    ...options,
+    ...restOptions,
+    headers: { "Content-Type": "application/json", ...authHeaders, ...callerHeaders },
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));

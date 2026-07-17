@@ -131,7 +131,7 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-on-background);
-  font-family: var(--font-sans);
+  font-family: var(--font-nunito), 'Nunito', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   min-height: 100dvh;
 }
 

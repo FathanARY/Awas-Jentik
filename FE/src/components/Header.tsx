@@ -73,7 +73,7 @@ export default function Header({ leftContent, rightContent }: HeaderProps) {
                       Admin Dashboard
                     </Link>
                   )}
-                  {user.role === "user" && (
+                  {user.role === "admin" && (
                     <Link href="/kader" className="block px-4 py-2 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
                       Kader Dashboard
                     </Link>

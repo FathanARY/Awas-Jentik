@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from "react";
 import { apiFetch } from "../api";
 import LiveCommunityMap from "@/components/LiveCommunityMap";
 import { getRiskStyle, getScoreThresholdStyle } from "@/lib/risk-utils";
+import { supabase } from "@/lib/supabase";
 
 interface StatsItem {
   total_laporan: number;
@@ -111,10 +112,11 @@ export default function AdminDashboardPage() {
     const fd = new FormData();
     fd.append("file", file);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/upload-csv/preview`, {
         method: "POST",
         body: fd,
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+        headers: { Authorization: `Bearer ${session?.access_token || ""}` },
       });
       const data: CsvPreviewData = await res.json();
       setCsvPreview(data);
