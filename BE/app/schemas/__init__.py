@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 from datetime import datetime
 
@@ -22,8 +22,17 @@ class HabitatInput(BaseModel):
 class MobilityInput(BaseModel):
     pendatang_30_hari: int = Field(ge=0)
     pendatang_dari_endemis: int = Field(ge=0)
-    pekerja_mobil: int = Field(ge=0)
+    pekerja_mobil: Optional[int] = Field(default=None, ge=0)
+    pekerja_tambang: Optional[int] = Field(default=0, ge=0)
+    pekerja_hutan: Optional[int] = Field(default=0, ge=0)
+    pekerja_perkebunan: Optional[int] = Field(default=0, ge=0)
     riwayat_perjalanan_endemis: int = Field(ge=0)
+
+    @model_validator(mode='after')
+    def compute_pekerja_mobil(self):
+        if self.pekerja_mobil is None:
+            self.pekerja_mobil = (self.pekerja_tambang or 0) + (self.pekerja_hutan or 0) + (self.pekerja_perkebunan or 0)
+        return self
 
 
 class LaporRequest(BaseModel):
@@ -177,8 +186,17 @@ class GridRiskResponse(BaseModel):
 class MobilitasInput(BaseModel):
     pendatang_30_hari: int = Field(ge=0)
     pendatang_dari_endemis: int = Field(ge=0)
-    pekerja_mobil: int = Field(ge=0)
+    pekerja_mobil: Optional[int] = Field(default=None, ge=0)
+    pekerja_tambang: Optional[int] = Field(default=0, ge=0)
+    pekerja_hutan: Optional[int] = Field(default=0, ge=0)
+    pekerja_perkebunan: Optional[int] = Field(default=0, ge=0)
     riwayat_perjalanan_endemis: int = Field(ge=0)
+
+    @model_validator(mode='after')
+    def compute_pekerja_mobil(self):
+        if self.pekerja_mobil is None:
+            self.pekerja_mobil = (self.pekerja_tambang or 0) + (self.pekerja_hutan or 0) + (self.pekerja_perkebunan or 0)
+        return self
 
 
 class MobilitasResponse(BaseModel):

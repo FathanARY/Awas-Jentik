@@ -51,7 +51,10 @@ async def submit_laporan(
     jarak_puskesmas_m: Optional[float] = Form(None),
     pendatang_30_hari: int = Form(...),
     pendatang_dari_endemis: int = Form(...),
-    pekerja_mobil: int = Form(...),
+    pekerja_mobil: Optional[int] = Form(None),
+    pekerja_tambang: Optional[int] = Form(None),
+    pekerja_hutan: Optional[int] = Form(None),
+    pekerja_perkebunan: Optional[int] = Form(None),
     riwayat_perjalanan_endemis: int = Form(...),
     kasus_malaria_1km_30hari: int = Form(default=0),
     lat: Optional[float] = Form(None),
@@ -62,7 +65,13 @@ async def submit_laporan(
     foto: Optional[UploadFile] = File(None),
     session: Session = Depends(get_session),
 ):
-    estimated = estimate_distances(grid_land)
+    grid_id = None
+    if lat is not None and lng is not None:
+        gx = int(abs(lat) * 100) % 100
+        gy = int(abs(lng) * 100) % 100
+        grid_id = f"AREA-{gx:02d}{gy:02d}"
+
+    estimated = estimate_distances(grid_land, grid_id)
 
     _curah_hujan = curah_hujan_30_hari_mm if curah_hujan_30_hari_mm is not None else estimated.get("curah_hujan_30_hari_mm", 250)
     _jarak_hutan = jarak_hutan_m if jarak_hutan_m is not None else estimated.get("jarak_hutan_m", 2000)
@@ -88,6 +97,9 @@ async def submit_laporan(
         "Jarak_Permukiman_m": _jarak_permukiman,
         "Jarak_Puskesmas_m": _jarak_puskesmas,
     }
+    if pekerja_mobil is None:
+        pekerja_mobil = (pekerja_tambang or 0) + (pekerja_hutan or 0) + (pekerja_perkebunan or 0)
+
     mobility_input = {
         "Pendatang_30_Hari": pendatang_30_hari,
         "Pendatang_Dari_Endemis": pendatang_dari_endemis,
@@ -111,12 +123,6 @@ async def submit_laporan(
     alamat = None
     if lat is not None and lng is not None:
         alamat = await reverse_geocode(lat, lng)
-
-    grid_id = None
-    if lat is not None and lng is not None:
-        gx = int(abs(lat) * 100) % 100
-        gy = int(abs(lng) * 100) % 100
-        grid_id = f"AREA-{gx:02d}{gy:02d}"
 
     kode_laporan = generate_kode()
 

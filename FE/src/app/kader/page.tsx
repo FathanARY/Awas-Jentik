@@ -56,6 +56,9 @@ export default function KaderDashboardPage() {
   const [form, setForm] = useState({
     pendatang_30_hari: 0,
     pendatang_dari_endemis: 0,
+    pekerja_tambang: 0,
+    pekerja_hutan: 0,
+    pekerja_perkebunan: 0,
     pekerja_mobil: 0,
     riwayat_perjalanan_endemis: 0,
   });
@@ -81,6 +84,9 @@ export default function KaderDashboardPage() {
           setForm({
             pendatang_30_hari: data.pendatang_30_hari || 0,
             pendatang_dari_endemis: data.pendatang_dari_endemis || 0,
+            pekerja_tambang: 0,
+            pekerja_hutan: 0,
+            pekerja_perkebunan: 0,
             pekerja_mobil: data.pekerja_mobil || 0,
             riwayat_perjalanan_endemis: data.riwayat_perjalanan_endemis || 0,
           });
@@ -95,9 +101,19 @@ export default function KaderDashboardPage() {
     setMobilitasResult(null);
     setMessage(null);
     try {
+      const pekerja_mobil = form.pekerja_mobil || (form.pekerja_tambang + form.pekerja_hutan + form.pekerja_perkebunan);
+      const payload = {
+        pendatang_30_hari: form.pendatang_30_hari,
+        pendatang_dari_endemis: form.pendatang_dari_endemis,
+        pekerja_mobil,
+        pekerja_tambang: form.pekerja_tambang,
+        pekerja_hutan: form.pekerja_hutan,
+        pekerja_perkebunan: form.pekerja_perkebunan,
+        riwayat_perjalanan_endemis: form.riwayat_perjalanan_endemis,
+      };
       const data = await apiFetch<MobilitasData>(`/mobilitas/${selectedGrid}`, {
         method: "POST",
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       setMobilitasResult(data);
       setMessage({ type: "success", text: `Grid ${selectedGrid} updated — risk: ${data.kategori}, score: ${(data.risiko_gabungan ?? 0).toFixed(0)}/100` });

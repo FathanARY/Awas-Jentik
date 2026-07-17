@@ -57,7 +57,7 @@ export default function LiveCommunityMap() {
     }
 
     fetchRisks(); // fetch immediately on mount
-    const interval = setInterval(fetchRisks, 5_000); // then every 5 seconds
+    const interval = setInterval(fetchRisks, 30_000); // then every 30 seconds
     return () => clearInterval(interval); // cleanup on unmount
   }, []);
 
