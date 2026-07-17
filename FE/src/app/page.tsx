@@ -104,7 +104,7 @@ export default function HomePage() {
       <Header />
 
       {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden flex flex-col items-center justify-center min-h-[90vh] text-center px-6 pt-24 hero-mesh water-surface">
+      <section className="relative overflow-hidden flex flex-col items-center justify-center min-h-screen text-center px-6 pt-32 pb-10 hero-mesh water-surface">
 
         {/* Dot grid layer */}
         <div className="absolute inset-0 dot-grid opacity-40 pointer-events-none" aria-hidden />
