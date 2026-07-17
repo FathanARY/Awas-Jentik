@@ -24,8 +24,8 @@ DESA_NAMES = [
 def seed_demo(session: Session):
     existing_user = session.exec(select(User).limit(1)).first()
     if not existing_user:
-        admin = User(username="admin", password_hash=get_password_hash("password123"), role="admin")
-        user = User(username="user", password_hash=get_password_hash("password123"), role="user")
+        admin = User(username="admin", email="admin@malariawatch.com", password_hash=get_password_hash("password123"), role="admin")
+        user = User(username="user", email="user@malariawatch.com", password_hash=get_password_hash("password123"), role="user")
         session.add(admin)
         session.add(user)
         session.commit()

@@ -1,22 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-
-/* ─────────────────────────────── Types ─────────────────────────────── */
-type LandType =
-  | "forest"
-  | "rice"
-  | "plantation"
-  | "residential"
-  | "river"
-  | "swamp"
-  | "mining"
-  | "road";
-
-interface Cell {
-  land: LandType;
-  special?: "puskesmas" | "school";
-}
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type LandType,
+  GRID,
+  LAND_COLORS,
+  PUSKESMAS,
+  SCHOOLS,
+  MAP_DATA,
+  LAT_MAX,
+  LAT_MIN,
+  LNG_MIN,
+  LNG_MAX,
+} from "@/components/MapGrid";
 
 interface HoveredCell {
   x: number;
@@ -25,94 +21,42 @@ interface HoveredCell {
   reports: number;
 }
 
-/* ─────────────────────────── Config ──────────────────────────────── */
-const GRID = 50;
-
-const LAND_COLORS: Record<LandType, string> = {
-  forest:      "#2d5a27",
-  rice:        "#7cb87a",
-  plantation:  "#9aaa55",
-  residential: "#d4c5a9",
-  river:       "#3a7bd5",
-  swamp:       "#5b8a6b",
-  mining:      "#4a4a4a",
-  road:        "#c0b8a8",
-};
-
-const PUSKESMAS = { col: 24, row: 26 };
-const SCHOOLS = [{ col: 13, row: 35 }, { col: 35, row: 12 }];
-
-/* ─────────────────────── Map generation ─────────────────────────── */
-function generateMap(): Cell[][] {
-  const grid: Cell[][] = Array.from({ length: GRID }, () =>
-    Array.from({ length: GRID }, () => ({ land: "road" as LandType }))
-  );
-
-  function fill(
-    land: LandType,
-    rowStart: number,
-    rowEnd: number,
-    colStart: number,
-    colEnd: number,
-    pred?: (r: number, c: number) => boolean
-  ) {
-    for (let r = rowStart; r <= rowEnd; r++) {
-      for (let c = colStart; c <= colEnd; c++) {
-        if (!pred || pred(r, c)) grid[r][c] = { ...grid[r][c], land };
-      }
-    }
-  }
-
-  fill("forest", 0, 28, 0, 20);
-  fill("forest", 0, 8, 21, 24, (r, c) => c <= 20 + (8 - r));
-  fill("forest", 22, 29, 0, 18, (r, c) => c <= 18 - Math.floor((r - 22) * 0.5));
-  fill("plantation", 0, 19, 31, 49);
-  fill("plantation", 0, 5, 43, 49, (r, c) => c <= 42 + r);
-  fill("rice", 15, 34, 21, 40);
-  fill("rice", 29, 38, 5, 20);
-  fill("residential", 20, 37, 21, 36);
-  fill("swamp", 38, 49, 0, 19);
-  fill("swamp", 44, 49, 20, 25);
-  fill("mining", 42, 49, 42, 49);
-  fill("mining", 40, 41, 44, 49);
-
-  for (let r = 0; r < GRID; r++) {
-    const col = Math.round(38 + 4 * Math.sin(r * 0.18));
-    for (let dc = -1; dc <= 1; dc++) {
-      const cc = col + dc;
-      if (cc >= 0 && cc < GRID) grid[r][cc] = { ...grid[r][cc], land: "river" };
-    }
-  }
-
-  grid[PUSKESMAS.row][PUSKESMAS.col].special = "puskesmas";
-  for (const s of SCHOOLS) grid[s.row][s.col].special = "school";
-
-  return grid;
-}
-
-const MAP_DATA = generateMap();
 
 export default function LiveCommunityMap() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hovered, setHovered] = useState<HoveredCell | null>(null);
 
-  const reportsData = useMemo(() => {
-    const data: number[][] = Array.from({ length: GRID }, () => Array(GRID).fill(0));
-    data[25][25] = 12; data[26][25] = 11; data[25][26] = 15;
-    data[30][25] = 13; data[29][26] = 11;
-    
-    data[40][10] = 8; data[41][10] = 7; data[40][11] = 6;
-    data[30][30] = 9; data[31][30] = 6;
-    
-    data[20][35] = 3; data[21][36] = 4; data[20][34] = 2;
-    data[10][10] = 4; data[11][10] = 2; data[10][11] = 1;
+  const [reportsData, setReportsData] = useState<number[][]>(() =>
+    Array.from({ length: GRID }, () => Array(GRID).fill(0))
+  );
+  const [fetchError, setFetchError] = useState(false);
 
-    const seed = [5, 12, 17, 22, 28, 33, 41, 45, 8, 19, 37, 44, 2, 48, 14, 24];
-    seed.forEach((val, i) => {
-        data[(val * 3) % GRID][(val * 7) % GRID] = (i % 5) + 1;
-    });
+  useEffect(() => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-    return data;
+    function fetchReports() {
+      fetch(`${API_BASE}/laporan?limit=200`, { cache: "no-store" })
+        .then((res) => {
+          if (!res.ok) throw new Error("fetch failed");
+          return res.json();
+        })
+        .then((laporan: { lat: number | null; lng: number | null }[]) => {
+          const data: number[][] = Array.from({ length: GRID }, () => Array(GRID).fill(0));
+          laporan.forEach((l) => {
+            if (l.lat == null || l.lng == null) return;
+            const col = Math.floor(((l.lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * GRID);
+            const row = Math.floor(((LAT_MAX - l.lat) / (LAT_MAX - LAT_MIN)) * GRID);
+            if (col < 0 || col >= GRID || row < 0 || row >= GRID) return;
+            data[row][col] = Math.min(15, data[row][col] + 1);
+          });
+          setReportsData(data);
+        })
+        .catch(() => setFetchError(true));
+    }
+
+    fetchReports(); // fetch immediately on mount
+    const interval = setInterval(fetchReports, 5_000); // then every 30 seconds
+    return () => clearInterval(interval); // cleanup on unmount
   }, []);
 
   const draw = useCallback(() => {

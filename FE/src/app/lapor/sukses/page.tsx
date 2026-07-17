@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { apiFetch } from "../../api";
 
 interface LaporanDetail {
@@ -23,7 +23,7 @@ function getRiskColors(score: number | null, category: string | null) {
   return { bg: "var(--color-surface-container)", left: "#10b981", chipBg: "#d1fae5", chipFg: "#065f46", level: "Low" };
 }
 
-export default function LaporSuksesPage() {
+function LaporSuksesContent() {
   const searchParams = useSearchParams();
   const kode = searchParams.get("kode");
   const [data, setData] = useState<LaporanDetail | null>(null);
@@ -121,5 +121,17 @@ export default function LaporSuksesPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function LaporSuksesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-dvh items-center justify-center p-4" style={{ backgroundColor: "var(--color-background)" }}>
+        <span className="material-symbols-outlined animate-spin text-4xl" style={{ color: "var(--color-primary)" }}>progress_activity</span>
+      </div>
+    }>
+      <LaporSuksesContent />
+    </Suspense>
   );
 }

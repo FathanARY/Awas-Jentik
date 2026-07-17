@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { API_BASE } from "../api";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -19,15 +19,13 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: username, // Using state variable 'username' as email
+        password,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Registration failed");
+      if (authError) {
+        throw new Error(authError.message);
       }
 
       // Success, redirect to login
@@ -66,18 +64,18 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Username</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 pointer-events-none material-symbols-outlined">
-                  person_add
+                  mail
                 </span>
                 <input
-                  type="text"
+                  type="email"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                  placeholder="Choose a username"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>

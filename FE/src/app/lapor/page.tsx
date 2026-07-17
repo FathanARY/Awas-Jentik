@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { apiPostForm } from "../api";
 import VillageMapPicker, { type SelectedCell } from "./VillageMapPicker";
+import { cellToLatLng } from "@/components/MapGrid";
 
 import Header from "@/components/Header";
 
@@ -52,15 +53,15 @@ export default function LaporPage() {
     fd.append("riwayat_perjalanan_endemis", "0");
     fd.append("kasus_malaria_1km_30hari", "0");
 
-    try {
-      const pos: GeolocationPosition = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
-      );
-      fd.append("lat", String(pos.coords.latitude));
-      fd.append("lng", String(pos.coords.longitude));
-    } catch {
+    // Derive lat/lng from the grid cell the user clicked (0-indexed col = x-1, row = y-1)
+    if (selectedGrid) {
+      const { lat, lng } = cellToLatLng(selectedGrid.x - 1, selectedGrid.y - 1);
+      fd.append("lat", String(lat));
+      fd.append("lng", String(lng));
+    } else {
+      // Fallback: centre of the bounding box
       fd.append("lat", "-6.200000");
-      fd.append("lng", "106.816666");
+      fd.append("lng", "106.820000");
     }
 
     try {

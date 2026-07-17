@@ -43,10 +43,10 @@ export default function Header({ leftContent, rightContent }: HeaderProps) {
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all pointer-events-auto">
                   <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-sm font-bold text-slate-800">{user.username}</p>
-                    <p className="text-xs text-slate-500 capitalize">{user.role}</p>
+                    <p className="text-sm font-bold text-slate-800">{user.email || user.user_metadata?.username || "User"}</p>
+                    <p className="text-xs text-slate-500 capitalize">{user.user_metadata?.role || "user"}</p>
                   </div>
-                  {user.role === "admin" && (
+                  {user.user_metadata?.role === "admin" && (
                     <Link href="/admin" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                       Admin Dashboard
                     </Link>

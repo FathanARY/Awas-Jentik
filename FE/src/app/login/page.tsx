@@ -4,12 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { useAuth } from "@/contexts/AuthContext";
-import { API_BASE } from "../api";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,34 +19,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: username, // Using the state variable 'username' as email
+        password,
       });
 
-      if (!res.ok) {
-        throw new Error("Invalid username or password");
+      if (authError) {
+        throw new Error(authError.message);
       }
 
-      const data = await res.json();
-      const token = data.access_token;
-
-      // Fetch user profile immediately
-      const profileRes = await fetch(`${API_BASE}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (profileRes.ok) {
-        const userData = await profileRes.json();
-        login(token, userData);
-        
-        if (userData.role === "admin") {
-          router.push("/admin");
-        } else {
-          router.push("/");
-        }
-      }
+      // Supabase handles session state, AuthContext will automatically pick it up.
+      router.push("/");
+      
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -83,18 +65,18 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Username</label>
+              <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 pointer-events-none material-symbols-outlined">
-                  person
+                  mail
                 </span>
                 <input
-                  type="text"
+                  type="email"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-slate-700 font-medium outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>
